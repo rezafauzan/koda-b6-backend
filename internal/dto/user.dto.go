@@ -15,3 +15,13 @@ type User struct {
 	Created_at  time.Time `json:"created_at"`
 	Updated_at  time.Time `json:"updated_at"`
 }
+
+type UserRegister struct {
+	First_name string `json:"first_name"`
+	Last_name  string `json:"last_name"`
+	Email      string `json:"email"`
+	Phone      string `json:"phone"`
+	Address    string `json:"address"`
+	Password    string `json:"password"`
+	Password_confirm    string `json:"password_confirm"`
+}
