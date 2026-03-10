@@ -6,6 +6,7 @@ import (
 	"rezafauzan/koda-b6-golang/internal/dto"
 	"rezafauzan/koda-b6-golang/internal/lib"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -121,8 +122,8 @@ func NewUserRouters(router *gin.Engine) {
 				})
 				return
 			}
-			sql := "INSERT INTO users (role_id,verified,created_at,updated_at) VALUES ($1, $2, $3, $4)"
-			commandTag, err := conn.Exec(context.Background(), sql)
+			sql := "INSERT INTO users (role_id,verified,created_at,updated_at) VALUES (2, false, $1, $2)"
+			commandTag, err := conn.Exec(context.Background(), sql, time.Now(), time.Now())
 			if err != nil {
 				ctx.JSON(http.StatusOK, dto.Response{
 					Success:  false,
@@ -131,6 +132,7 @@ func NewUserRouters(router *gin.Engine) {
 				})
 				return
 			}
+			
 			if commandTag.RowsAffected() > 0 {
 				ctx.JSON(http.StatusOK, dto.Response{
 					Success:  true,
