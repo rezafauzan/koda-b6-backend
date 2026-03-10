@@ -22,32 +22,32 @@ func NewUserRouters(router *gin.Engine) {
 					Messages: "Failed to connect to database! : " + err.Error(),
 					Results:  nil,
 				})
-			} else {
-				sql := "SELECT * FROM users"
-				rows, err := conn.Query(context.Background(), sql)
-				if err != nil {
-					ctx.JSON(http.StatusOK, dto.Response{
-						Success:  false,
-						Messages: "Failed to get all users! : " + err.Error(),
-						Results:  nil,
-					})
-				} else {
-					users, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.User])
-					if err != nil {
-						ctx.JSON(http.StatusOK, dto.Response{
-							Success:  false,
-							Messages: "Failed to create response get all users! : " + err.Error(),
-							Results:  nil,
-						})
-					} else {
-						ctx.JSON(http.StatusOK, dto.Response{
-							Success:  true,
-							Messages: "GET users",
-							Results:  users,
-						})
-					}
-				}
 			}
+
+			sql := "SELECT * FROM users"
+			rows, err := conn.Query(context.Background(), sql)
+			if err != nil {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to get all users! : " + err.Error(),
+					Results:  nil,
+				})
+			}
+
+			users, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.User])
+			if err != nil {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create response get all users! : " + err.Error(),
+					Results:  nil,
+				})
+			}
+
+			ctx.JSON(http.StatusOK, dto.Response{
+				Success:  true,
+				Messages: "GET users",
+				Results:  users,
+			})
 		})
 
 		userRoutes.POST("", func(ctx *gin.Context) {
