@@ -22,6 +22,7 @@ func NewUserRouters(router *gin.Engine) {
 					Messages: "Failed to connect to database! : " + err.Error(),
 					Results:  nil,
 				})
+				return
 			}
 
 			sql := "SELECT * FROM users"
@@ -32,6 +33,7 @@ func NewUserRouters(router *gin.Engine) {
 					Messages: "Failed to get all users! : " + err.Error(),
 					Results:  nil,
 				})
+				return
 			}
 
 			users, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.User])
@@ -41,6 +43,7 @@ func NewUserRouters(router *gin.Engine) {
 					Messages: "Failed to create response get all users! : " + err.Error(),
 					Results:  nil,
 				})
+				return
 			}
 
 			ctx.JSON(http.StatusOK, dto.Response{
