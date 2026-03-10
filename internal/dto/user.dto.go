@@ -3,15 +3,15 @@ package dto
 import "time"
 
 type User struct {
-	id          int
-	user_avatar string
-	first_name  string
-	last_name   string
-	email       string
-	phone       string
-	address     string
-	verified    bool
-	role_name   string
-	created_at  time.Time
-	updated_at  time.Time
+	Id          int       `json:"id"`
+	User_avatar string    `json:"user_avatar"`
+	First_name  string    `json:"first_name"`
+	Last_name   string    `json:"last_name"`
+	Email       string    `json:"email"`
+	Phone       string    `json:"phone"`
+	Address     string    `json:"address"`
+	Verified    bool      `json:"verified"`
+	Role_name   string    `json:"role_name"`
+	Created_at  time.Time `json:"created_at"`
+	Updated_at  time.Time `json:"updated_at"`
 }
