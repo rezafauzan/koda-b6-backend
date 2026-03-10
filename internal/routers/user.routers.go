@@ -156,6 +156,18 @@ func NewUserRouters(router *gin.Engine) {
 				return
 			}
 			
+			sql = "INSERT INTO users_credentials (users_id, email, phone, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
+			commandTag, err = conn.Exec(context.Background(), sql, registeredUser.Id, newUser.Email, newUser.Phone, newUser.Password, time.Now(), time.Now())
+
+			if err != nil {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create new user! : " + err.Error(),
+					Results:  nil,
+				})
+				return
+			}
+			
 			if commandTag.RowsAffected() > 0 {
 				ctx.JSON(http.StatusOK, dto.Response{
 					Success:  true,
