@@ -1,0 +1,16 @@
+DROP TABLE IF EXISTS cart_items;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS carts;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS product_images;
+DROP TABLE IF EXISTS product_variants;
+DROP TABLE IF EXISTS product_portions;
+DROP TABLE IF EXISTS product_campaigns;
+DROP TABLE IF EXISTS product_discounts;
+DROP TABLE IF EXISTS product_reviews;
+DROP TABLE IF EXISTS product_categories;
+DROP TABLE IF EXISTS user_profiles;
+DROP TABLE IF EXISTS user_credentials;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS testimonies;
