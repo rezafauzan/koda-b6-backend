@@ -1,0 +1,15 @@
+ALTER TABLE cart_items ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE orders ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE carts ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE products ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE product_images ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE product_variants ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE product_portions ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE product_campaigns ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE product_discounts ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE product_reviews ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE product_categories ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE user_profiles ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE user_credentials ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE users ALTER COLUMN updated_at SET DEFAULT NOW();
+ALTER TABLE roles ALTER COLUMN updated_at SET DEFAULT NOW();

@@ -13,4 +13,3 @@ DROP TABLE IF EXISTS user_profiles;
 DROP TABLE IF EXISTS user_credentials;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS roles;
-DROP TABLE IF EXISTS testimonies;
