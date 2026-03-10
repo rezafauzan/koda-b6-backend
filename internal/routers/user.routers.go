@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"rezafauzan/koda-b6-golang/internal/dto"
 	"rezafauzan/koda-b6-golang/internal/lib"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -53,6 +54,64 @@ func NewUserRouters(router *gin.Engine) {
 		})
 
 		userRoutes.POST("", func(ctx *gin.Context) {
+			var newUser dto.UserRegister
+			ctx.ShouldBind(&newUser)
+			if len(newUser.First_name) < 4 {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create user! : First name length minimum is 4 characters !",
+					Results:  nil,
+				})
+				return
+			}
+			if len(newUser.Last_name) < 4 {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create user! : Last name length minimum is 4 characters !",
+					Results:  nil,
+				})
+				return
+			}
+			if !strings.Contains(newUser.Email, "@"){
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create user! : Invalid email format !",
+					Results:  nil,
+				})
+				return
+			}
+			if len(newUser.Phone) < 10 {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create user! : Phone numbers length minimum 10 digits !",
+					Results:  nil,
+				})
+				return
+			}
+			if len(newUser.Address) < 10 {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create user! : Address length minimum is 10 characters !",
+					Results:  nil,
+				})
+				return
+			}
+			if len(newUser.Password) < 8 {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create user! : Password too weak minimum length is 8 characters !",
+					Results:  nil,
+				})
+				return
+			}
+			if newUser.Password_confirm != newUser.Password {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create user! : Password confirmation missmatch !",
+					Results:  nil,
+				})
+				return
+			}
 			conn, err := lib.DatabaseConnect()
 			if err != nil {
 				ctx.JSON(http.StatusOK, dto.Response{
