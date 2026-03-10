@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"rezafauzan/koda-b6-golang/internal/dto"
 	"rezafauzan/koda-b6-golang/internal/lib"
+	"rezafauzan/koda-b6-golang/internal/models"
 	"strings"
 	"time"
 
@@ -122,8 +123,30 @@ func NewUserRouters(router *gin.Engine) {
 				})
 				return
 			}
-			sql := "INSERT INTO users (role_id,verified,created_at,updated_at) VALUES (2, false, $1, $2)"
-			commandTag, err := conn.Exec(context.Background(), sql, time.Now(), time.Now())
+			sql := "INSERT INTO users (role_id,verified,created_at,updated_at) VALUES (2, false, $1, $2) RETURNING id, role_id, verified, created_at,updated_at"
+			rows, err := conn.Query(context.Background(), sql, time.Now(), time.Now())
+			if err != nil {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create new user! : " + err.Error(),
+					Results:  nil,
+				})
+				return
+			}
+
+			registeredUser, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
+			if err != nil {
+				ctx.JSON(http.StatusOK, dto.Response{
+					Success:  false,
+					Messages: "Failed to create new user! : " + err.Error(),
+					Results:  nil,
+				})
+				return
+			}
+
+			sql = "INSERT INTO users_profiles (users_id, user_avatar, first_name, last_name, address, created_at, updated_at) VALUES ($1, https://i.pravatar.cc/400?img=4, $2, $3, $4, $5, $6)"
+			commandTag, err := conn.Exec(context.Background(), sql, registeredUser.Id, newUser.First_name, newUser.Last_name, newUser.Address, time.Now(), time.Now())
+
 			if err != nil {
 				ctx.JSON(http.StatusOK, dto.Response{
 					Success:  false,
