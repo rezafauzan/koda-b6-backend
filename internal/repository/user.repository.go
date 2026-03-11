@@ -30,7 +30,7 @@ func (u UserRepository) GetUserByEmail(email string) (dto.User, error) {
 		return dto.User{}, err
 	}
 
-	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[dto.User])
+	user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[dto.User])
 		if err != nil {
 		return dto.User{}, err
 	}
