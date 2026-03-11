@@ -1,4 +1,4 @@
-CREATE TABLE forgot_password (
+CREATE TABLE IF NOT EXISTS forgot_password (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255),
     code_otp INT,
