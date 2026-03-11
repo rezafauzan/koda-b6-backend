@@ -4,6 +4,7 @@ import (
 	"context"
 	"rezafauzan/koda-b6-golang/internal/lib"
 	"rezafauzan/koda-b6-golang/internal/models"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -21,6 +22,19 @@ func NewForgotPasswordRepository() (*ForgotPasswordRepository, error) {
 	return &ForgotPasswordRepository{
 		db: db,
 	}, nil
+}
+
+func (f ForgotPasswordRepository) CreateForgotPasswordData(email string, code_otp int) (models.ForgotPassword, error) {
+	sql := "INSERT INTO forgot_password (email, code_otp, expired_at) VALUES ($1, $2, $3)"
+	rows, err := f.db.Query(context.Background(), sql, email, code_otp, time.Now().Add(5 * time.Minute))
+	if err != nil {
+		return models.ForgotPassword{}, err
+	}
+	data, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.ForgotPassword])
+	if err != nil {
+		return models.ForgotPassword{}, err
+	}
+	return data, nil
 }
 
 func (f ForgotPasswordRepository) GetDataByEmailCode(email string, code_otp int) (models.ForgotPassword, error) {
