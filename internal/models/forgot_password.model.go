@@ -2,11 +2,11 @@ package models
 
 import "time"
 
-type Forgot_Password struct {
-	id         int
-	email      string
-	code_otp   int
-	expired_at time.Time
-	created_at time.Time
-	updated_at time.Time
+type ForgotPassword struct {
+	Id         int `json:"id"`
+	Email      string `json:"email"`
+	Code_otp   int `json:"code_otp"`
+	Expired_at time.Time `json:"expired_at"`
+	Created_at time.Time `json:"created_at"`
+	Updated_at time.Time `json:"updated_at"`
 }
