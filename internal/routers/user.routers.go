@@ -123,8 +123,8 @@ func NewUserRouters(router *gin.Engine) {
 				})
 				return
 			}
-			sql := "INSERT INTO users (role_id,verified,created_at,updated_at) VALUES (2, false, $1, $2) RETURNING id, role_id, verified, created_at,updated_at"
-			rows, err := conn.Query(context.Background(), sql, time.Now(), time.Now())
+			sql := "INSERT INTO users (role_id,verified,created_at,updated_at) VALUES ($1, $2, $3, $4) RETURNING id, role_id, verified, created_at,updated_at"
+			rows, err := conn.Query(context.Background(), sql, 2, false, time.Now(), time.Now())
 			if err != nil {
 				ctx.JSON(http.StatusOK, dto.Response{
 					Success:  false,
@@ -144,8 +144,8 @@ func NewUserRouters(router *gin.Engine) {
 				return
 			}
 
-			sql = "INSERT INTO users_profiles (users_id, user_avatar, first_name, last_name, address, created_at, updated_at) VALUES ($1, https://i.pravatar.cc/400?img=4, $2, $3, $4, $5, $6)"
-			commandTag, err := conn.Exec(context.Background(), sql, registeredUser.Id, newUser.First_name, newUser.Last_name, newUser.Address, time.Now(), time.Now())
+			sql = "INSERT INTO user_profiles (user_id, user_avatar, first_name, last_name, address, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+			commandTag, err := conn.Exec(context.Background(), sql, registeredUser.Id, "https://i.pravatar.cc/400?img=4", newUser.First_name, newUser.Last_name, newUser.Address, time.Now(), time.Now())
 
 			if err != nil {
 				ctx.JSON(http.StatusOK, dto.Response{
@@ -156,7 +156,7 @@ func NewUserRouters(router *gin.Engine) {
 				return
 			}
 			
-			sql = "INSERT INTO users_credentials (users_id, email, phone, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
+			sql = "INSERT INTO user_credentials (user_id, email, phone, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
 			commandTag, err = conn.Exec(context.Background(), sql, registeredUser.Id, newUser.Email, newUser.Phone, newUser.Password, time.Now(), time.Now())
 
 			if err != nil {
