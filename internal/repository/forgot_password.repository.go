@@ -23,9 +23,22 @@ func NewForgotPasswordRepository() (*ForgotPasswordRepository, error) {
 	}, nil
 }
 
-func (f ForgotPasswordRepository) GetDataByEmailCode(email string) (models.ForgotPassword, error) {
-	sql := "SELECT email, code_otp, expired_at, created_at, updated_at FROM forgot_password WHERE email = $1"
-	rows, err := f.db.Query(context.Background(), sql, email)
+func (f ForgotPasswordRepository) GetDataByEmailCode(email string, code_otp int) (models.ForgotPassword, error) {
+	sql := "SELECT email, code_otp, expired_at, created_at, updated_at FROM forgot_password WHERE email = $1 AND code_otp = $2"
+	rows, err := f.db.Query(context.Background(), sql, email, code_otp)
+	if err != nil {
+		return models.ForgotPassword{}, err
+	}
+	data, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.ForgotPassword])
+	if err != nil {
+		return models.ForgotPassword{}, err
+	}
+	return data, nil
+}
+
+func (f ForgotPasswordRepository) DeleteDataByEmailCode(email string, code_otp int) (models.ForgotPassword, error) {
+	sql := "DELETE FROM forgot_password WHERE email = $1 AND code_otp = $2"
+	rows, err := f.db.Query(context.Background(), sql, email, code_otp)
 	if err != nil {
 		return models.ForgotPassword{}, err
 	}
