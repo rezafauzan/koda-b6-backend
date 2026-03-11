@@ -44,7 +44,7 @@ func (f ForgotPasswordRepository) GetDataByEmailCode(email string, code_otp big.
 	if err != nil {
 		return models.ForgotPassword{}, err
 	}
-	data, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.ForgotPassword])
+	data, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[models.ForgotPassword])
 	if err != nil {
 		return models.ForgotPassword{}, err
 	}
