@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"math/big"
 	"rezafauzan/koda-b6-golang/internal/lib"
 	"rezafauzan/koda-b6-golang/internal/models"
 	"time"
@@ -24,7 +25,7 @@ func NewForgotPasswordRepository() (*ForgotPasswordRepository, error) {
 	}, nil
 }
 
-func (f ForgotPasswordRepository) CreateForgotPasswordData(email string, code_otp int) (models.ForgotPassword, error) {
+func (f ForgotPasswordRepository) CreateForgotPasswordData(email string, code_otp *big.Int) (models.ForgotPassword, error) {
 	sql := "INSERT INTO forgot_password (email, code_otp, expired_at) VALUES ($1, $2, $3)"
 	rows, err := f.db.Query(context.Background(), sql, email, code_otp, time.Now().Add(5 * time.Minute))
 	if err != nil {
@@ -37,8 +38,8 @@ func (f ForgotPasswordRepository) CreateForgotPasswordData(email string, code_ot
 	return data, nil
 }
 
-func (f ForgotPasswordRepository) GetDataByEmailCode(email string, code_otp int) (models.ForgotPassword, error) {
-	sql := "SELECT email, code_otp, expired_at, created_at, updated_at FROM forgot_password WHERE email = $1 AND code_otp = $2"
+func (f ForgotPasswordRepository) GetDataByEmailCode(email string, code_otp big.Int) (models.ForgotPassword, error) {
+	sql := "SELECT email, code_otp, expired_at FROM forgot_password WHERE email = $1 AND code_otp = $2"
 	rows, err := f.db.Query(context.Background(), sql, email, code_otp)
 	if err != nil {
 		return models.ForgotPassword{}, err
@@ -50,7 +51,7 @@ func (f ForgotPasswordRepository) GetDataByEmailCode(email string, code_otp int)
 	return data, nil
 }
 
-func (f ForgotPasswordRepository) DeleteDataByEmailCode(email string, code_otp int) (models.ForgotPassword, error) {
+func (f ForgotPasswordRepository) DeleteDataByEmailCode(email string, code_otp big.Int) (models.ForgotPassword, error) {
 	sql := "DELETE FROM forgot_password WHERE email = $1 AND code_otp = $2"
 	rows, err := f.db.Query(context.Background(), sql, email, code_otp)
 	if err != nil {
