@@ -7,7 +7,13 @@ Host: localhost:8888
 Content-Type: application/json
 
 {
-
+"first_name": "Reza",
+"last_name": "Fauzan",
+"email": "rezafauzan945@gmail.com",
+"phone": "+6285183356072",
+"address": "Jl.Terusan Soreang-Cipatik No.16",
+"password": "Test1234",
+"password_confirm": "Test1234"
 }
 
 ###
