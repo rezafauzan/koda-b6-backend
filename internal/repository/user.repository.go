@@ -2,8 +2,11 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"rezafauzan/koda-b6-golang/internal/dto"
 	"rezafauzan/koda-b6-golang/internal/lib"
+	"rezafauzan/koda-b6-golang/internal/models"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -36,4 +39,32 @@ func (u UserRepository) GetUserByEmail(email string) (dto.User, error) {
 	}
 	
 	return user, nil
+}
+
+func (u UserRepository) AddNewUser(newUser dto.UserRegister) (dto.UserRegister, error){
+	sql := "INSERT INTO users (role_id,verified,created_at,updated_at) VALUES ($1, $2, $3, $4) RETURNING id, role_id, verified, created_at,updated_at"
+	rows, err := u.db.Query(context.Background(), sql, 2, false, time.Now(), time.Now())
+	if err != nil {
+		return dto.UserRegister{}, errors.New("Failed to create new user! : " + err.Error())
+	}
+
+	registeredUser, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
+	if err != nil {
+		return dto.UserRegister{}, errors.New("Failed to create new user! : " + err.Error())
+	}
+
+	sql = "INSERT INTO user_profiles (user_id, user_avatar, first_name, last_name, address, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+	_, err = u.db.Exec(context.Background(), sql, registeredUser.Id, "https://i.pravatar.cc/400?img=4", newUser.First_name, newUser.Last_name, newUser.Address, time.Now(), time.Now())
+
+	if err != nil {
+		return dto.UserRegister{}, errors.New("Failed to create new user! : " + err.Error())
+	}
+
+	sql = "INSERT INTO user_credentials (user_id, email, phone, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
+	_, err = u.db.Exec(context.Background(), sql, registeredUser.Id, newUser.Email, newUser.Phone, newUser.Password, time.Now(), time.Now())
+
+	if err != nil {
+		return dto.UserRegister{}, errors.New("Failed to create new user! : " + err.Error())
+	}
+	return newUser, nil
 }
