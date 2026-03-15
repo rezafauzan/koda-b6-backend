@@ -12,7 +12,7 @@ type UserRouter struct{
 	userHandler *handlers.UserHandler
 }
 
-func NewUserRouters(router *gin.Engine, container di.Container) {
+func NewUserRouters(router *gin.Engine, container *di.Container) {
 	userRoutes := router.Group("/users")
 	{
 		userRoutes.GET("", container.UserHandler.GetAllUsers)
