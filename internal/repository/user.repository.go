@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"rezafauzan/koda-b6-golang/internal/dto"
-	"rezafauzan/koda-b6-golang/internal/lib"
 	"rezafauzan/koda-b6-golang/internal/models"
 	"time"
 
@@ -15,12 +14,7 @@ type UserRepository struct {
 	db *pgx.Conn
 }
 
-func NewUserRepository() (*UserRepository, error) {
-	db, err := lib.DatabaseConnect()
-	if err != nil {
-		return nil, err
-	}
-
+func NewUserRepository(db *pgx.Conn) (*UserRepository, error) {
 	return &UserRepository{
 		db: db,
 	}, nil
