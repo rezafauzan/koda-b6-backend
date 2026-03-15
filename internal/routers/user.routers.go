@@ -2,19 +2,22 @@ package routers
 
 import (
 	"net/http"
+	"rezafauzan/koda-b6-golang/internal/di"
 	"rezafauzan/koda-b6-golang/internal/dto"
 	"rezafauzan/koda-b6-golang/internal/handlers"
 
 	"github.com/gin-gonic/gin"
 )
+type UserRouter struct{
+	userHandler *handlers.UserHandler
+}
 
-func NewUserRouters(router *gin.Engine) {
-	userHandler := handlers.NewUserHandlers()
+func NewUserRouters(router *gin.Engine, container di.Container) {
 	userRoutes := router.Group("/users")
 	{
-		userRoutes.GET("", userHandler.GetAllUsers)
+		userRoutes.GET("", container.UserHandler.GetAllUsers)
 
-		userRoutes.POST("", userHandler.AddNewUser)
+		userRoutes.POST("", container.UserHandler.AddNewUser)
 
 		userRoutes.PATCH("", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, dto.Response{
