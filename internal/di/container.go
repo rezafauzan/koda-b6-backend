@@ -19,9 +19,11 @@ func NewContainer() (*Container, error){
 	if err != nil {
 		return nil, err
 	}
-	return &Container{
+	container := &Container{
 		db: db,
-	}, nil
+	}
+	container.initDependencies()
+	return container, nil
 }
 
 func (c *Container) initDependencies(){
