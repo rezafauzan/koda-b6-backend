@@ -17,7 +17,7 @@ type UserHandler struct {
 
 func NewUserHandler(userService *services.UserService) (*UserHandler){
 	return &UserHandler{
-		userService: &services.UserService{},
+		userService: userService,
 	}
 }
 
@@ -61,7 +61,7 @@ func (u UserHandler) GetAllUsers(ctx *gin.Context) {
 }
 
 func (u UserHandler) AddNewUser(ctx *gin.Context) {
-	var newUser dto.UserRegister
+	var newUser *dto.UserRegister
 	ctx.ShouldBind(&newUser)
 	newUser, err := u.userService.AddNewUser(newUser)
 	if err != nil {
@@ -73,7 +73,7 @@ func (u UserHandler) AddNewUser(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, dto.Response{
-		Success:  false,
+		Success:  true,
 		Messages: "Register Success!",
 		Results:  newUser,
 	})
