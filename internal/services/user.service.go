@@ -41,3 +41,12 @@ func (u UserService) AddNewUser(newUser *dto.UserRegister) (*dto.UserRegister, e
 	}
 	return u.userRepo.AddNewUser(newUser)
 }
+
+func (u UserService) GetAllUser() ([]dto.User, error){
+	users, err := u.userRepo.GetAllUsers()
+	if err != nil {
+		return []dto.User{}, err
+	}
+
+	return users, nil
+}
