@@ -9,11 +9,12 @@ import (
 )
 
 func NewUserRouters(router *gin.Engine) {
+	userHandler := handlers.NewUserHandlers()
 	userRoutes := router.Group("/users")
 	{
-		userRoutes.GET("", handlers.UserHandler.GetAllUsers)
+		userRoutes.GET("", userHandler.GetAllUsers)
 
-		userRoutes.POST("", handlers.UserHandler.AddNewUser)
+		userRoutes.POST("", userHandler.AddNewUser)
 
 		userRoutes.PATCH("", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, dto.Response{

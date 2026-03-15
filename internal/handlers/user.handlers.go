@@ -15,6 +15,12 @@ type UserHandler struct {
 	userService *services.UserService
 }
 
+func NewUserHandlers() (*UserHandler){
+	return &UserHandler{
+		userService: &services.UserService{},
+	}
+}
+
 func (u UserHandler) GetAllUsers(ctx *gin.Context) {
 	conn, err := lib.DatabaseConnect()
 	if err != nil {
