@@ -12,6 +12,7 @@ import (
 type Container struct {
 	db *pgx.Conn
 	UserHandler *handlers.UserHandler
+	RoleHandler *handlers.RoleHandler
 }
 
 func NewContainer() (*Container, error){
@@ -30,4 +31,8 @@ func (c *Container) initDependencies(){
 	userRepo , _ := repository.NewUserRepository(c.db)
 	userService := services.NewUserService(userRepo)
 	c.UserHandler = handlers.NewUserHandler(userService)
+
+	roleRepo , _ := repository.NewRoleRepository(c.db)
+	roleService := services.NewRoleService(roleRepo)
+	c.RoleHandler = handlers.NewRoleHandler(roleService)
 }
