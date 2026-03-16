@@ -88,3 +88,13 @@ func (u RoleRepository) UpdateRole(newData models.Role) (models.Role, error) {
 
 	return updatedRole, nil
 }
+
+func (u RoleRepository) DeleteRole(id int) error {
+	sql := `DELETE FROM roles WHERE id = $1`
+	_, err := u.db.Exec(context.Background(), sql, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
