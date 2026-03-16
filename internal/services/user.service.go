@@ -17,7 +17,7 @@ func NewUserService(userRepo *repository.UserRepository) *UserService {
 	}
 }
 
-func (u UserService) AddNewUser(newUser *dto.UserRegister) (*dto.UserRegister, error){
+func (u UserService) AddNewUser(newUser *dto.UserRegister) (*dto.UserRegister, error) {
 	if len(newUser.First_name) < 4 {
 		return &dto.UserRegister{}, errors.New("Failed to create user! : First name length minimum is 4 characters !")
 	}
@@ -42,7 +42,7 @@ func (u UserService) AddNewUser(newUser *dto.UserRegister) (*dto.UserRegister, e
 	return u.userRepo.AddNewUser(newUser)
 }
 
-func (u UserService) GetAllUser() ([]dto.User, error){
+func (u UserService) GetAllUser() ([]dto.User, error) {
 	users, err := u.userRepo.GetAllUsers()
 	if err != nil {
 		return []dto.User{}, err
@@ -51,7 +51,7 @@ func (u UserService) GetAllUser() ([]dto.User, error){
 	return users, nil
 }
 
-func (u UserService) UpdateUserProfiles(newUser dto.UpdateUserProfile) (dto.User, error){
+func (u UserService) UpdateUserProfiles(newUser dto.UpdateUserProfile) (dto.User, error) {
 
 	if newUser.First_name != "" && len(newUser.First_name) < 4 {
 		return dto.User{}, errors.New("First name minimum 4 characters")
@@ -70,4 +70,19 @@ func (u UserService) UpdateUserProfiles(newUser dto.UpdateUserProfile) (dto.User
 	}
 
 	return u.userRepo.UpdateUserProfile(newUser)
+}
+
+func (u UserService) DeleteUser(id int) (dto.User, error) {
+	user, err := u.userRepo.GetUserById(id)
+	if err != nil {
+		return user, errors.New("User not found !")
+	}
+
+	err = u.userRepo.DeleteUser(id)
+
+	if err != nil {
+		return dto.User{}, errors.New("Failed to delete user: " + err.Error())
+	}
+
+	return user, nil
 }

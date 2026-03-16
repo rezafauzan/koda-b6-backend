@@ -128,3 +128,25 @@ func (u UserRepository) UpdateUserProfile(newData dto.UpdateUserProfile) (dto.Us
 	
 	return updatedUser, nil
 }
+
+func (u UserRepository) DeleteUser(id int) error {
+	sql := `DELETE FROM user_credentials WHERE user_id = $1`
+	_, err := u.db.Exec(context.Background(), sql, id)
+	if err != nil {
+		return err
+	}
+
+	sql = `DELETE FROM user_profiles WHERE user_id = $1`
+	_, err = u.db.Exec(context.Background(), sql, id)
+	if err != nil {
+		return err
+	}
+
+	sql = `DELETE FROM users WHERE id = $1`
+	_, err = u.db.Exec(context.Background(), sql, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

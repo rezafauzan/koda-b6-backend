@@ -31,17 +31,7 @@ Content-Type: application/json
 
 ###
 
-PATCH /users HTTP/1.1
-Host: localhost:8888
-Content-Type: application/json
-
-{
-
-}
-
-###
-
-DELETE /users HTTP/1.1
+DELETE /users/25 HTTP/1.1
 Host: localhost:8888
 
 ###

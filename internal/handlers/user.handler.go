@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"rezafauzan/koda-b6-golang/internal/dto"
 	"rezafauzan/koda-b6-golang/internal/services"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -71,5 +72,32 @@ func (u UserHandler) UpdateUserProfiles(ctx *gin.Context) {
 		Success:  true,
 		Messages: "Update Users Success !",
 		Results:  updatedUser,
+	})
+}
+
+func (u UserHandler) DeleteUser(ctx *gin.Context) {
+	idParam := ctx.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Messages: "Invalid user id !",
+			Results: nil,
+		})
+		return
+	}
+	deletedUser, err := u.userService.DeleteUser(id)
+	if err != nil {
+		ctx.JSON(http.StatusOK, dto.Response{
+			Success:  false,
+			Messages: "Delete user failed : " + err.Error(),
+			Results:  nil,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, dto.Response{
+		Success:  true,
+		Messages: "Delete Users Success !",
+		Results:  deletedUser,
 	})
 }
