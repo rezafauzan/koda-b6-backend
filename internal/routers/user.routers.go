@@ -19,13 +19,7 @@ func NewUserRouters(router *gin.Engine, container *di.Container) {
 
 		userRoutes.POST("", container.UserHandler.AddNewUser)
 
-		userRoutes.PATCH("", func(ctx *gin.Context) {
-			ctx.JSON(http.StatusOK, dto.Response{
-				Success:  true,
-				Messages: "PATCH users",
-				Results:  nil,
-			})
-		})
+		userRoutes.PATCH("", container.UserHandler.UpdateUserProfiles)
 
 		userRoutes.DELETE("", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, dto.Response{

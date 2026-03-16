@@ -54,3 +54,22 @@ func (u UserHandler) AddNewUser(ctx *gin.Context) {
 		Results:  newUser,
 	})
 }
+
+func (u UserHandler) UpdateUserProfiles(ctx *gin.Context) {
+	var newUser dto.UpdateUserProfile
+	ctx.ShouldBind(&newUser)
+	updatedUser, err := u.userService.UpdateUserProfiles(newUser)
+	if err != nil {
+		ctx.JSON(http.StatusOK, dto.Response{
+			Success:  false,
+			Messages: err.Error(),
+			Results:  nil,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, dto.Response{
+		Success:  true,
+		Messages: "Update Users Success !",
+		Results:  updatedUser,
+	})
+}

@@ -20,7 +20,7 @@ func NewUserRepository(db *pgx.Conn) (*UserRepository, error) {
 	}, nil
 }
 
-func (u UserRepository) AddNewUser(newUser *dto.UserRegister) (*dto.UserRegister, error){
+func (u UserRepository) AddNewUser(newUser *dto.UserRegister) (*dto.UserRegister, error) {
 	sql := "INSERT INTO users (role_id,verified,created_at,updated_at) VALUES ($1, $2, $3, $4) RETURNING id, role_id, verified, created_at,updated_at"
 	rows, err := u.db.Query(context.Background(), sql, 2, false, time.Now(), time.Now())
 	if err != nil {
@@ -71,24 +71,60 @@ func (u UserRepository) GetUserByEmail(email string) (dto.User, error) {
 	}
 
 	user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[dto.User])
-		if err != nil {
+	if err != nil {
 		return dto.User{}, err
 	}
-	
+
 	return user, nil
 }
 
 func (u UserRepository) GetUserById(id int) (dto.User, error) {
-	sql := `SELECT users.id, user_profiles.user_avatar, user_profiles.first_name, user_profiles.last_name, user_credentials.email, user_credentials.phone, user_profiles.address, users.verified, roles.role_name, users.created_at, users.updated_at FROM users JOIN roles ON roles.id = users.role_id JOIN user_profiles ON user_profiles.user_id = users.id JOIN user_credentials ON user_credentials.user_id = users.id WHERE users.id = '$1'`
-	rows, err := u.db.Query(context.Background(), sql)
+	sql := `SELECT users.id, user_profiles.user_avatar, user_profiles.first_name, user_profiles.last_name, user_credentials.email, user_credentials.phone, user_profiles.address, users.verified, roles.role_name, users.created_at, users.updated_at FROM users JOIN roles ON roles.id = users.role_id JOIN user_profiles ON user_profiles.user_id = users.id JOIN user_credentials ON user_credentials.user_id = users.id WHERE users.id = $1`
+	rows, err := u.db.Query(context.Background(), sql, id)
 	if err != nil {
 		return dto.User{}, err
 	}
 
 	user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[dto.User])
-		if err != nil {
+	if err != nil {
+		return dto.User{}, err
+	}
+
+	return user, nil
+}
+
+func (u UserRepository) UpdateUserProfile(newData dto.UpdateUserProfile) (dto.User, error) {
+	user, err := u.GetUserById(newData.Id)
+	if err != nil {
+		return dto.User{}, err
+	}
+
+	if newData.First_name == "" {
+		newData.First_name = user.First_name
+	}
+
+	if newData.Last_name == "" {
+		newData.Last_name = user.Last_name
+	}
+
+	if newData.Address == "" {
+		newData.Address = user.Address
+	}
+
+	if newData.User_avatar == "" {
+		newData.User_avatar = user.User_avatar
+	}
+
+	sql := `UPDATE user_profiles SET first_name = $1, last_name = $2, address = $3, user_avatar = $4, updated_at = $5 WHERE user_id = $6`
+
+	_, err = u.db.Exec(context.Background(), sql, newData.First_name, newData.Last_name, newData.Address, newData.User_avatar, time.Now(), newData.Id)
+	if err != nil {
+		return dto.User{}, err
+	}
+	updatedUser, err := u.GetUserById(newData.Id)
+	if err != nil {
 		return dto.User{}, err
 	}
 	
-	return user, nil
+	return updatedUser, nil
 }

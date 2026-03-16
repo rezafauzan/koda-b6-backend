@@ -50,3 +50,24 @@ func (u UserService) GetAllUser() ([]dto.User, error){
 
 	return users, nil
 }
+
+func (u UserService) UpdateUserProfiles(newUser dto.UpdateUserProfile) (dto.User, error){
+
+	if newUser.First_name != "" && len(newUser.First_name) < 4 {
+		return dto.User{}, errors.New("First name minimum 4 characters")
+	}
+
+	if newUser.Last_name != "" && len(newUser.Last_name) < 4 {
+		return dto.User{}, errors.New("Last name minimum 4 characters")
+	}
+
+	if newUser.Address != "" && len(newUser.Address) < 10 {
+		return dto.User{}, errors.New("Address minimum 10 characters")
+	}
+
+	if newUser.User_avatar != "" && len(newUser.User_avatar) < 10 {
+		return dto.User{}, errors.New("User avatar minimum 10 characters")
+	}
+
+	return u.userRepo.UpdateUserProfile(newUser)
+}

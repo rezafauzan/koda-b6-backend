@@ -17,6 +17,19 @@ Content-Type: application/json
 }
 
 ###
+PATCH  /users HTTP/1.1
+Host: localhost:8888
+Content-Type: application/json
+
+{
+"id": 1,
+"first_name": "Reza",
+"last_name": "Fauzan",
+"address": "Jl.Terusan Soreang-Cipatik No.16",
+"user_avatar": "https://i.pravatar.cc/400?img=54"
+}
+
+###
 
 PATCH /users HTTP/1.1
 Host: localhost:8888

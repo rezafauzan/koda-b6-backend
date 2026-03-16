@@ -17,11 +17,19 @@ type User struct {
 }
 
 type UserRegister struct {
-	First_name string `json:"first_name"`
-	Last_name  string `json:"last_name"`
-	Email      string `json:"email"`
-	Phone      string `json:"phone"`
-	Address    string `json:"address"`
-	Password    string `json:"password"`
-	Password_confirm    string `json:"password_confirm"`
+	First_name       string `json:"first_name"`
+	Last_name        string `json:"last_name"`
+	Email            string `json:"email"`
+	Phone            string `json:"phone"`
+	Address          string `json:"address"`
+	Password         string `json:"password"`
+	Password_confirm string `json:"password_confirm"`
+}
+
+type UpdateUserProfile struct {
+	Id          int    `json:"id"`
+	First_name  string `json:"first_name"`
+	Last_name   string `json:"last_name"`
+	Address     string `json:"address"`
+	User_avatar string `json:"user_avatar"`
 }
