@@ -16,7 +16,7 @@ func NewRoleService(roleRepo *repository.RoleRepository) *RoleService {
 	}
 }
 
-func (u RoleService) AddNewRole(newRole models.Role) (models.Role, error) {
+func (u RoleService) AddNewRole(newRole *models.Role) (models.Role, error) {
 	if len(newRole.Role_name) < 4 {
 		return models.Role{}, errors.New("Failed to create role! : Role name length minimum is 4 characters !")
 	}
@@ -32,7 +32,7 @@ func (u RoleService) GetAllRole() ([]models.Role, error) {
 	return roles, nil
 }
 
-func (u RoleService) UpdateRoles(newRole models.Role) (models.Role, error) {
+func (u RoleService) UpdateRole(newRole models.Role) (models.Role, error) {
 
 	if newRole.Role_name != "" && len(newRole.Role_name) < 4 {
 		return models.Role{}, errors.New("Role name minimum 4 characters")
