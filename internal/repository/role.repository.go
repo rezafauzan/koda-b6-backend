@@ -63,3 +63,28 @@ func (u RoleRepository) GetRoleById(id int) (models.Role, error) {
 
 	return role, nil
 }
+
+func (u RoleRepository) UpdateRole(newData models.Role) (models.Role, error) {
+	role, err := u.GetRoleById(newData.Id)
+	if err != nil {
+		return models.Role{}, err
+	}
+
+	if newData.Role_name == "" {
+		newData.Role_name = role.Role_name
+	}
+
+	sql := `UPDATE roles SET role_name = $1, updated_at = $2 WHERE role_id = $3`
+
+	_, err = u.db.Exec(context.Background(), sql, newData.Role_name, time.Now(), newData.Id)
+	if err != nil {
+		return models.Role{}, err
+	}
+
+	updatedRole, err := u.GetRoleById(newData.Id)
+	if err != nil {
+		return models.Role{}, err
+	}
+
+	return updatedRole, nil
+}
