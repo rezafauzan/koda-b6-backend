@@ -25,6 +25,7 @@ func main() {
 	router.Use(middleware.CORSMiddleware())
 
 	routers.NewUserRouters(router, container)
+	routers.NewRoleRouters(router, container)
 
 	router.Run(fmt.Sprintf("localhost:%s", os.Getenv("PORT")))
 }
