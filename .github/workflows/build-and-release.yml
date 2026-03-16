@@ -47,5 +47,5 @@ jobs:
                     script: |
                         cd server-reza
                         docker compose pull
-                        docker run --rm --network=server-reza_default migrate/migrate:latest -source github://${{ secrets.GITHUB_TOKEN }}@rezafauzan/koda-b6-backend/migrations -database postgresql://postgres:1@pg:5432/postgres?sslmode=disable up
-                        docker compose up
+                        docker run --rm --network=server-reza_default migrate/migrate:latest -source github://rezafauzan:${{ secrets.GITHUB_TOKEN }}@rezafauzan/koda-b6-backend/migrations -database postgresql://postgres:1@pg:5432/postgres?sslmode=disable up
+                        docker compose up backend -d
