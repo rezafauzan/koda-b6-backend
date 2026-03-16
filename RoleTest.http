@@ -1,0 +1,28 @@
+GET /roles HTTP/1.1
+Host: localhost:8888
+
+###
+POST /roles HTTP/1.1
+Host: localhost:8888
+Content-Type: application/json
+
+{
+    "role_name": "Reza"
+}
+
+###
+PATCH  /roles HTTP/1.1
+Host: localhost:8888
+Content-Type: application/json
+
+{
+"id": 4,
+"role_name": "Guest"
+}
+
+###
+
+DELETE /roles/4 HTTP/1.1
+Host: localhost:8888
+
+###
