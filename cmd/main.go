@@ -19,7 +19,7 @@ func main() {
 	container, err := di.NewContainer()
 
 	if err != nil {
-		panic("Container Error")
+		panic("Container Error : " + err.Error())
 	}
 
 	router.Use(middleware.CORSMiddleware())
