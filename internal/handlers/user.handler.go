@@ -37,10 +37,18 @@ func (u UserHandler) GetAllUsers(ctx *gin.Context) {
 	})
 }
 
-func (u UserHandler) AddNewUser(ctx *gin.Context) {
-	var newUser *dto.CreateUserDTO
-	ctx.ShouldBind(&newUser)
-	newUser, err := u.userService.AddNewUser(newUser)
+func (u UserHandler) CreateNewUser(ctx *gin.Context) {
+	var newUser dto.CreateUserDTO
+	err := ctx.ShouldBind(&newUser)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success:  false,
+			Messages: err.Error(),
+			Results:  nil,
+		})
+		return
+	}
+	newUser, err = u.userService.CreateNewUser(newUser)
 	if err != nil {
 		ctx.JSON(http.StatusOK, dto.Response{
 			Success:  false,

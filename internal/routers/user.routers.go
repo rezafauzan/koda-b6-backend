@@ -16,7 +16,7 @@ func NewUserRouters(router *gin.Engine, container *di.Container) {
 	{
 		userRoutes.GET("", container.UserHandler.GetAllUsers)
 
-		userRoutes.POST("", container.UserHandler.AddNewUser)
+		userRoutes.POST("", container.UserHandler.CreateNewUser)
 
 		userRoutes.PATCH("", container.UserHandler.UpdateUserProfiles)
 

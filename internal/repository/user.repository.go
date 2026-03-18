@@ -20,31 +20,32 @@ func NewUserRepository(db *pgx.Conn) (*UserRepository, error) {
 	}, nil
 }
 
-func (u UserRepository) AddNewUser(newUser *dto.CreateUserDTO) (*dto.CreateUserDTO, error) {
+func (u UserRepository) CreateNewUser(newUser dto.CreateUserDTO) (dto.CreateUserDTO, error) {
 	sql := "INSERT INTO users (role_id,verified,created_at,updated_at) VALUES ($1, $2, $3, $4) RETURNING id, role_id, verified, created_at,updated_at"
-	rows, err := u.db.Query(context.Background(), sql, 2, false, time.Now(), time.Now())
+	rows, err := u.db.Query(context.Background(), sql, 2, true, time.Now(), time.Now())
 	if err != nil {
-		return &dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
+		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
 	}
 
 	registeredUser, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
 	if err != nil {
-		return &dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
-	}
-
-	sql = "INSERT INTO user_profiles (user_id, user_avatar, first_name, last_name, address, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
-	_, err = u.db.Exec(context.Background(), sql, registeredUser.Id, "https://i.pravatar.cc/400?img=4", newUser.First_name, newUser.Last_name, newUser.Address, time.Now(), time.Now())
-
-	if err != nil {
-		return &dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
+		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
 	}
 
 	sql = "INSERT INTO user_credentials (user_id, email, phone, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
 	_, err = u.db.Exec(context.Background(), sql, registeredUser.Id, newUser.Email, newUser.Phone, newUser.Password, time.Now(), time.Now())
 
 	if err != nil {
-		return &dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
+		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
 	}
+
+	sql = "INSERT INTO user_profiles (user_id, user_avatar, first_name, last_name, address, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+	_, err = u.db.Exec(context.Background(), sql, registeredUser.Id, "https://i.pravatar.cc/400?img=4", newUser.First_name, newUser.Last_name, newUser.Address, time.Now(), time.Now())
+
+	if err != nil {
+		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
+	}
+
 	return newUser, nil
 }
 
@@ -63,19 +64,48 @@ func (u UserRepository) GetAllUsers() ([]dto.UserResponseDTO, error) {
 	return users, nil
 }
 
-func (u UserRepository) GetUserByEmail(email string) (dto.UserResponseDTO, error) {
-	sql := `SELECT users.id, user_profiles.user_avatar, user_profiles.first_name, user_profiles.last_name, user_credentials.email, user_credentials.phone, user_profiles.address, users.verified, roles.role_name, users.created_at, users.updated_at FROM users JOIN roles ON roles.id = users.role_id JOIN user_profiles ON user_profiles.user_id = users.id JOIN user_credentials ON user_credentials.user_id = users.id WHERE user_credentials.email = '$1'`
+func (u UserRepository) GetUserByEmail(email string) (dto.UserResponseDTO, bool, error) {
+	sql := `
+	SELECT
+		email
+	FROM
+		user_credentials
+	WHERE
+		email = '$1'
+	`
 	rows, err := u.db.Query(context.Background(), sql, email)
 	if err != nil {
-		return dto.UserResponseDTO{}, err
+		return dto.UserResponseDTO{}, false, err
 	}
 
 	user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[dto.UserResponseDTO])
 	if err != nil {
-		return dto.UserResponseDTO{}, err
+		return dto.UserResponseDTO{}, false, err
 	}
 
-	return user, nil
+	return user, true, nil
+}
+
+func (u UserRepository) GetUserByPhone(phone string) (dto.UserResponseDTO, bool, error) {
+	sql := `
+	SELECT
+		phone
+	FROM
+		user_credentials
+	WHERE
+		phone = '$1'
+	`
+	rows, err := u.db.Query(context.Background(), sql, phone)
+	if err != nil {
+		return dto.UserResponseDTO{}, false, err
+	}
+
+	user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[dto.UserResponseDTO])
+	if err != nil {
+		return dto.UserResponseDTO{}, false, err
+	}
+
+	return user, true, nil
 }
 
 func (u UserRepository) GetUserById(id int) (dto.UserResponseDTO, error) {
