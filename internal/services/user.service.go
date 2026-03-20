@@ -64,6 +64,15 @@ func (u UserService) GetAllUser() ([]dto.UserResponseDTO, error) {
 	return users, nil
 }
 
+func (u UserService) GetUserById(id int) (dto.UserResponseDTO, error) {
+	user, err := u.userRepo.GetUserById(id)
+	if err != nil {
+		return dto.UserResponseDTO{}, err
+	}
+
+	return user, nil
+}
+
 func (u UserService) UpdateUserProfiles(newUser dto.UpdateUserProfileDTO) (dto.UserResponseDTO, error) {
 
 	if newUser.First_name != "" && len(newUser.First_name) < 4 {
