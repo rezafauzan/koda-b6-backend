@@ -6,6 +6,5 @@ type LoginRequestDTO struct {
 }
 
 type LoginResponseDTO struct {
-	Token   string `json:"token"`
-	User_id int    `json:"user_id"`
+	Token string          `json:"token"`
 }
