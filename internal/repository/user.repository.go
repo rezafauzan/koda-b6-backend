@@ -68,18 +68,18 @@ func (u UserRepository) GetUserByEmail(email string) (dto.UserResponseDTO, bool,
 	sql := `SELECT users.id, user_profiles.user_avatar, user_profiles.first_name, user_profiles.last_name, user_credentials.email, user_credentials.phone, user_profiles.address, users.verified, roles.role_name, users.created_at, users.updated_at FROM users JOIN roles ON roles.id = users.role_id JOIN user_profiles ON user_profiles.user_id = users.id JOIN user_credentials ON user_credentials.user_id = users.id WHERE user_credentials.email = $1`
 	rows, err := u.db.Query(context.Background(), sql, email)
 	if err != nil {
-		return dto.UserResponseDTO{}, false, err
+		return dto.UserResponseDTO{}, false, errors.New("Failed to fetch user by email from database : " + err.Error())
 	}
-	
+
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[dto.UserResponseDTO])
 	if err != nil {
-		return dto.UserResponseDTO{}, false, err
+		return dto.UserResponseDTO{}, false, errors.New("Failed to convert rows to struct : " + err.Error())
 	}
 	return user, true, nil
 }
 
 func (u UserRepository) GetUserByPhone(phone string) (dto.UserResponseDTO, bool, error) {
-sql := `SELECT users.id, user_profiles.user_avatar, user_profiles.first_name, user_profiles.last_name, user_credentials.email, user_credentials.phone, user_profiles.address, users.verified, roles.role_name, users.created_at, users.updated_at FROM users JOIN roles ON roles.id = users.role_id JOIN user_profiles ON user_profiles.user_id = users.id JOIN user_credentials ON user_credentials.user_id = users.id WHERE user_credentials.phone = $1`
+	sql := `SELECT users.id, user_profiles.user_avatar, user_profiles.first_name, user_profiles.last_name, user_credentials.email, user_credentials.phone, user_profiles.address, users.verified, roles.role_name, users.created_at, users.updated_at FROM users JOIN roles ON roles.id = users.role_id JOIN user_profiles ON user_profiles.user_id = users.id JOIN user_credentials ON user_credentials.user_id = users.id WHERE user_credentials.phone = $1`
 	rows, err := u.db.Query(context.Background(), sql, phone)
 	if err != nil {
 		return dto.UserResponseDTO{}, false, err
@@ -91,6 +91,19 @@ sql := `SELECT users.id, user_profiles.user_avatar, user_profiles.first_name, us
 	}
 
 	return user, true, nil
+}
+
+func (u UserRepository) GetUserCredentialsByEmail(email string) (dto.UserCredentialResponseDTO, error) {
+	sql := `SELECT id, user_id, email, phone, password, created_at, updated_at FROM user_credentials WHERE email = $1`
+	rows, err := u.db.Query(context.Background(), sql, email)
+	userCred, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[dto.UserCredentialResponseDTO])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return dto.UserCredentialResponseDTO{}, errors.New("Failed to login! : Invalid email or password !")
+		}
+		return dto.UserCredentialResponseDTO{}, err
+	}
+	return userCred, nil
 }
 
 func (u UserRepository) GetUserById(id int) (dto.UserResponseDTO, error) {
