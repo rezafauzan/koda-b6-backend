@@ -3,13 +3,10 @@ package services
 import (
 	"errors"
 	"rezafauzan/koda-b6-golang/internal/dto"
+	"rezafauzan/koda-b6-golang/internal/lib"
 	"rezafauzan/koda-b6-golang/internal/repository"
 	"strings"
-
-	"github.com/golang-jwt/jwt/v5"
 )
-
-const jwtSecretKey = "2c9341ca4cf3d87b9e4eb905d6a3ec45" // Test1234 MD5
 
 type AuthService struct {
 	userRepo *repository.UserRepository
@@ -26,25 +23,28 @@ func (a AuthService) Login(req dto.LoginRequestDTO) (dto.LoginResponseDTO, error
 		return dto.LoginResponseDTO{}, errors.New("Failed to login! : Invalid email format !")
 	}
 
-	userId, storedPassword, err := a.userRepo.GetUserCredentialsByEmail(req.Email)
+	userCred, err := a.userRepo.GetUserCredentialsByEmail(req.Email)
 	if err != nil {
-		return dto.LoginResponseDTO{}, err
+		return dto.LoginResponseDTO{}, errors.New("Failed to get user credentials by email : " + err.Error())
 	}
 
-	if req.Password != storedPassword {
+	if req.Password != userCred.Password {
 		return dto.LoginResponseDTO{}, errors.New("Failed to login! : Invalid email or password !")
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": userId,
-	})
-
-	tokenString, err := token.SignedString([]byte(jwtSecretKey))
+	user, _, err := a.userRepo.GetUserByEmail(req.Email)
+	
 	if err != nil {
-		return dto.LoginResponseDTO{}, errors.New("Failed to login! : " + err.Error())
+		return dto.LoginResponseDTO{}, errors.New("Failed to get user by email : " + err.Error())
+	}
+
+	token, err := lib.GenerateToken(user)
+
+	if err != nil {
+		return dto.LoginResponseDTO{}, errors.New("Failed to generate token : " + err.Error())
 	}
 
 	return dto.LoginResponseDTO{
-		Token:   tokenString,
+		Token: token,
 	}, nil
 }
