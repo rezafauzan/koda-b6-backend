@@ -78,13 +78,14 @@ func (f ForgotPasswordService) ResetPassword(req dto.ResetForgotPasswordDTO) err
 		otpRaw = strings.TrimSpace(req.Code_otp)
 	}
 	if otpRaw == "" {
-		return errors.New("Failed to reset password! : OTP is invalid !")
+		return errors.New("Failed to reset password! : Failed to trim otp input !")
 	}
 
 	otpAsNumber, err := strconv.Atoi(otpRaw)
 	if err != nil {
-		return errors.New("Failed to reset password! : OTP is invalid !")
+		return errors.New("Failed to reset password! : Failed to convert otp to number !")
 	}
+	fmt.Println(latestOTP.CodeOtp)
 	if latestOTP.CodeOtp != otpAsNumber {
 		return errors.New("Failed to reset password! : OTP is invalid !")
 	}
@@ -95,6 +96,11 @@ func (f ForgotPasswordService) ResetPassword(req dto.ResetForgotPasswordDTO) err
 	}
 
 	_ = f.forgotPasswordRepo.MarkOTPUsed(latestOTP.Id)
+	
+	err = f.forgotPasswordRepo.ClearForgotPassword(req.Email)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
