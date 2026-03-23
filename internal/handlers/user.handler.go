@@ -13,7 +13,7 @@ type UserHandler struct {
 	userService *services.UserService
 }
 
-func NewUserHandler(userService *services.UserService) (*UserHandler){
+func NewUserHandler(userService *services.UserService) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 	}
@@ -37,10 +37,18 @@ func (u UserHandler) GetAllUsers(ctx *gin.Context) {
 	})
 }
 
-func (u UserHandler) AddNewUser(ctx *gin.Context) {
-	var newUser *dto.UserRegister
-	ctx.ShouldBind(&newUser)
-	newUser, err := u.userService.AddNewUser(newUser)
+func (u UserHandler) CreateNewUser(ctx *gin.Context) {
+	var newUser dto.CreateUserDTO
+	err := ctx.ShouldBind(&newUser)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success:  false,
+			Messages: err.Error(),
+			Results:  nil,
+		})
+		return
+	}
+	newUser, err = u.userService.CreateNewUser(newUser)
 	if err != nil {
 		ctx.JSON(http.StatusOK, dto.Response{
 			Success:  false,
@@ -57,7 +65,7 @@ func (u UserHandler) AddNewUser(ctx *gin.Context) {
 }
 
 func (u UserHandler) UpdateUserProfiles(ctx *gin.Context) {
-	var newUser dto.UpdateUserProfile
+	var newUser dto.UpdateUserProfileDTO
 	ctx.ShouldBind(&newUser)
 	updatedUser, err := u.userService.UpdateUserProfiles(newUser)
 	if err != nil {
@@ -80,9 +88,9 @@ func (u UserHandler) DeleteUser(ctx *gin.Context) {
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
-			Success: false,
+			Success:  false,
 			Messages: "Invalid user id !",
-			Results: nil,
+			Results:  nil,
 		})
 		return
 	}

@@ -19,7 +19,7 @@ func main() {
 	container, err := di.NewContainer()
 
 	if err != nil {
-		panic("Container Error")
+		panic("Container Error : " + err.Error())
 	}
 
 	router.Use(middleware.CORSMiddleware())
@@ -27,5 +27,5 @@ func main() {
 	routers.NewUserRouters(router, container)
 	routers.NewRoleRouters(router, container)
 
-	router.Run(fmt.Sprintf("localhost:%s", os.Getenv("PORT")))
+	router.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
 }

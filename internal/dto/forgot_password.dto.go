@@ -1,12 +1,13 @@
 package dto
 
-type ForgotPasswordRequest struct{
-	Email string
+type RequestForgotPasswordDTO struct {
+	Email string `json:"email"`
 }
 
-type ForgotPasswordUpdateRequest struct{
-	Email string
-	code_otp int
-	NewPassword string
-	ConfirmNewPassword string
+type ResetForgotPasswordDTO struct {
+	Email            string `json:"email"`
+	Otp              string `json:"otp"`
+	Code_otp         string `json:"code_otp"`
+	New_password     string `json:"new_password"`
+	Password_confirm string `json:"password_confirm"`
 }

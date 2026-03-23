@@ -2,7 +2,7 @@ package dto
 
 import "time"
 
-type User struct {
+type UserResponseDTO struct {
 	Id          int       `json:"id"`
 	User_avatar string    `json:"user_avatar"`
 	First_name  string    `json:"first_name"`
@@ -16,7 +16,7 @@ type User struct {
 	Updated_at  time.Time `json:"updated_at"`
 }
 
-type UserRegister struct {
+type CreateUserDTO struct {
 	First_name       string `json:"first_name"`
 	Last_name        string `json:"last_name"`
 	Email            string `json:"email"`
@@ -26,7 +26,7 @@ type UserRegister struct {
 	Password_confirm string `json:"password_confirm"`
 }
 
-type UpdateUserProfile struct {
+type UpdateUserProfileDTO struct {
 	Id          int    `json:"id"`
 	First_name  string `json:"first_name"`
 	Last_name   string `json:"last_name"`
