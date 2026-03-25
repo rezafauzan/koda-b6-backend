@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type UserCredentialRepository struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
-func NewUserCredentialRepository(db *pgx.Conn) (*UserCredentialRepository, error) {
+func NewUserCredentialRepository(db *pgxpool.Pool) (*UserCredentialRepository, error) {
 	return &UserCredentialRepository{
 		db: db,
 	}, nil
