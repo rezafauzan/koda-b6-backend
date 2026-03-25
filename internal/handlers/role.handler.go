@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"rezafauzan/koda-b6-golang/internal/dto"
-	"rezafauzan/koda-b6-golang/internal/models"
 	"rezafauzan/koda-b6-golang/internal/services"
 	"strconv"
 
@@ -15,7 +13,7 @@ type RoleHandler struct {
 	roleService *services.RoleService
 }
 
-func NewRoleHandler(roleService *services.RoleService) (*RoleHandler){
+func NewRoleHandler(roleService *services.RoleService) *RoleHandler {
 	return &RoleHandler{
 		roleService: roleService,
 	}
@@ -39,11 +37,18 @@ func (u RoleHandler) GetAllRoles(ctx *gin.Context) {
 	})
 }
 
-func (u RoleHandler) AddNewRole(ctx *gin.Context) {
-	var newRole models.Role
-	ctx.ShouldBind(&newRole)
-	fmt.Println(&newRole)
-	newRole, err := u.roleService.AddNewRole(&newRole)
+func (u RoleHandler) CreateNewRole(ctx *gin.Context) {
+	var newRole dto.CreateRoleDTO
+	err := ctx.ShouldBind(&newRole)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success:  false,
+			Messages: err.Error(),
+			Results:  nil,
+		})
+		return
+	}
+	newRoleResult, err := u.roleService.CreateNewRole(newRole)
 	if err != nil {
 		ctx.JSON(http.StatusOK, dto.Response{
 			Success:  false,
@@ -54,13 +59,13 @@ func (u RoleHandler) AddNewRole(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, dto.Response{
 		Success:  true,
-		Messages: "Add Role Success !",
-		Results:  newRole,
+		Messages: "Create Role Success !",
+		Results:  newRoleResult,
 	})
 }
 
 func (u RoleHandler) UpdateRole(ctx *gin.Context) {
-	var newRole models.Role
+	var newRole dto.UpdateRoleDTO
 	ctx.ShouldBind(&newRole)
 	updatedRole, err := u.roleService.UpdateRole(newRole)
 	if err != nil {
@@ -83,9 +88,9 @@ func (u RoleHandler) DeleteRole(ctx *gin.Context) {
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
-			Success: false,
+			Success:  false,
 			Messages: "Invalid role id !",
-			Results: nil,
+			Results:  nil,
 		})
 		return
 	}
