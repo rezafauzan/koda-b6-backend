@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type RoleRepository struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
-func NewRoleRepository(db *pgx.Conn) (*RoleRepository, error) {
+func NewRoleRepository(db *pgxpool.Pool) (*RoleRepository, error) {
 	return &RoleRepository{
 		db: db,
 	}, nil
@@ -21,7 +22,7 @@ func NewRoleRepository(db *pgx.Conn) (*RoleRepository, error) {
 
 func (u RoleRepository) AddNewRole(newRole *models.Role) (models.Role, error) {
 	sql := "INSERT INTO roles (role_name, created_at, updated_at) VALUES ($1, $2, $3) RETURNING id, role_name, created_at, updated_at"
-	rows, err := u.db.Query(context.Background(), sql, newRole.Role_name, time.Now(), time.Now())
+	rows, err := u.db.Query(context.Background(), sql, newRole.RoleName, time.Now(), time.Now())
 	if err != nil {
 		return models.Role{}, errors.New("Failed to create new role! : " + err.Error())
 	}
@@ -70,13 +71,13 @@ func (u RoleRepository) UpdateRole(newData models.Role) (models.Role, error) {
 		return models.Role{}, err
 	}
 
-	if newData.Role_name == "" {
-		newData.Role_name = role.Role_name
+	if newData.RoleName == "" {
+		newData.RoleName = role.RoleName
 	}
 
 	sql := `UPDATE roles SET role_name = $1, updated_at = $2 WHERE id = $3`
 
-	_, err = u.db.Exec(context.Background(), sql, newData.Role_name, time.Now(), newData.Id)
+	_, err = u.db.Exec(context.Background(), sql, newData.RoleName, time.Now(), newData.Id)
 	if err != nil {
 		return models.Role{}, err
 	}
