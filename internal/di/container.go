@@ -12,6 +12,8 @@ import (
 type Container struct {
 	db                    *pgxpool.Pool
 	UserHandler           *handlers.UserHandler
+	UserProfileHandler    *handlers.UserProfileHandler
+	UserCredentialHandler *handlers.UserCredentialHandler
 	AuthHandler           *handlers.AuthHandler
 	RoleHandler           *handlers.RoleHandler
 	ForgotPasswordHandler *handlers.ForgotPasswordHandler
@@ -33,6 +35,14 @@ func (c *Container) initDependencies() {
 	userRepo, _ := repository.NewUserRepository(c.db)
 	userService := services.NewUserService(userRepo)
 	c.UserHandler = handlers.NewUserHandler(userService)
+	
+	userProfileRepo, _ := repository.NewUserRepository(c.db)
+	userProfileService := services.NewUserService(userProfileRepo)
+	c.UserHandler = handlers.NewUserHandler(userProfileService)
+
+	userCredentialRepo, _ := repository.NewUserRepository(c.db)
+	userCredentialService := services.NewUserService(userCredentialRepo)
+	c.UserHandler = handlers.NewUserHandler(userCredentialService)
 
 	authService := services.NewAuthService(userRepo)
 	c.AuthHandler = handlers.NewAuthHandler(authService)
