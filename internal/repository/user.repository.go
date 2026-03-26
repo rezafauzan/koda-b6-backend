@@ -8,13 +8,14 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type UserRepository struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
-func NewUserRepository(db *pgx.Conn) (*UserRepository, error) {
+func NewUserRepository(db *pgxpool.Pool) (*UserRepository, error) {
 	return &UserRepository{
 		db: db,
 	}, nil
@@ -172,6 +173,16 @@ func (u UserRepository) DeleteUser(id int) error {
 
 	sql = `DELETE FROM users WHERE id = $1`
 	_, err = u.db.Exec(context.Background(), sql, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u UserRepository) UpdatePassword(email string, newPassword string) error {
+	sql := `UPDATE user_credentials SET password = $1, updated_at = $2 WHERE email = $3`
+	_, err := u.db.Exec(context.Background(), sql, newPassword, time.Now(), email)
 	if err != nil {
 		return err
 	}

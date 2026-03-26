@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type UserProfileRepository struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
-func NewUserProfileRepository(db *pgx.Conn) (*UserProfileRepository, error) {
+func NewUserProfileRepository(db *pgxpool.Pool) (*UserProfileRepository, error) {
 	return &UserProfileRepository{
 		db: db,
 	}, nil
