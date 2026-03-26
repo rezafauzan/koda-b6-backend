@@ -16,7 +16,7 @@ func NewRoleRouters(router *gin.Engine, container *di.Container) {
 	{
 		roleRoutes.GET("", container.RoleHandler.GetAllRoles)
 
-		roleRoutes.POST("", container.RoleHandler.AddNewRole)
+		roleRoutes.POST("", container.RoleHandler.CreateNewRole)
 
 		roleRoutes.PATCH("", container.RoleHandler.UpdateRole)
 
