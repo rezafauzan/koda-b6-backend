@@ -58,11 +58,21 @@ func (u UserProfileService) GetAllUserProfile() ([]dto.UserProfileResponseDTO, e
 }
 
 func (u UserProfileService) GetUserProfileById(id int) (dto.UserProfileResponseDTO, error) {
-	x, err := u.userProfileRepo.GetUserProfileById(id)
+	profile, err := u.userProfileRepo.GetUserProfileById(id)
 	if err != nil {
 		return dto.UserProfileResponseDTO{}, errors.New("User profile not found !")
 	}
-	return dto.UserProfileResponseFromModel(x), nil
+	return dto.UserProfileResponseFromModel(profile), nil
+}
+
+func (u *UserProfileService) GetUserProfileByUserId(user_id int) (dto.UserProfileResponseDTO, error) {
+	profile, err := u.userProfileRepo.GetUserProfileByUserId(user_id)
+
+	if err != nil {
+		return dto.UserProfileResponseDTO{}, errors.New("User profile not found !")
+	}
+
+	return dto.UserProfileResponseFromModel(profile), nil
 }
 
 func (u UserProfileService) UpdateUserProfileEntity(newData dto.UpdateUserProfileEntityDTO) (dto.UserProfileResponseDTO, error) {
