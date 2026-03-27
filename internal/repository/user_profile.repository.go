@@ -57,7 +57,22 @@ func (u UserProfileRepository) GetUserProfileById(id int) (models.UserProfile, e
 		return models.UserProfile{}, err
 	}
 
-	userProfile, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[models.UserProfile])
+	userProfile, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.UserProfile])
+	if err != nil {
+		return models.UserProfile{}, err
+	}
+
+	return userProfile, nil
+}
+
+func (u *UserProfileRepository) GetUserProfileByUserId(user_id int) (models.UserProfile, any) {
+	sql := `SELECT id, user_id, user_avatar, first_name, last_name, address, created_at, updated_at FROM user_profiles WHERE user_id = $1`
+	rows, err := u.db.Query(context.Background(), sql, user_id)
+	if err != nil {
+		return models.UserProfile{}, err
+	}
+
+	userProfile, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.UserProfile])
 	if err != nil {
 		return models.UserProfile{}, err
 	}
