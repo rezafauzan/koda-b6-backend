@@ -3,6 +3,7 @@ package routers
 import (
 	"rezafauzan/koda-b6-golang/internal/di"
 	"rezafauzan/koda-b6-golang/internal/handlers"
+	"rezafauzan/koda-b6-golang/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,14 +13,10 @@ type UserProfileRouter struct {
 }
 
 func NewUserProfileRouters(router *gin.Engine, container *di.Container) {
-	userProfileRoutes := router.Group("/user-profiles")
+	userProfileRoutes := router.Group("/profile")
 	{
-		userProfileRoutes.GET("", container.UserProfileHandler.GetAllUserProfiles)
+		userProfileRoutes.GET("", middleware.AuthMiddleware() ,container.UserProfileHandler.GetUserProfile)
 
-		userProfileRoutes.POST("", container.UserProfileHandler.CreateNewUserProfile)
-
-		userProfileRoutes.PATCH("", container.UserProfileHandler.UpdateUserProfileEntity)
-
-		userProfileRoutes.DELETE(":id", container.UserProfileHandler.DeleteUserProfile)
+		userProfileRoutes.PATCH("", middleware.AuthMiddleware(), container.UserProfileHandler.UpdateUserProfile)
 	}
 }
