@@ -3,10 +3,8 @@ package handlers
 import (
 	"net/http"
 	"rezafauzan/koda-b6-golang/internal/dto"
-	"rezafauzan/koda-b6-golang/internal/lib"
 	"rezafauzan/koda-b6-golang/internal/services"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,51 +34,6 @@ func (u UserHandler) GetAllUsers(ctx *gin.Context) {
 		Success:  true,
 		Messages: "GET all users",
 		Results:  users,
-	})
-}
-
-func (u UserHandler) GetLoggedInUser(ctx *gin.Context) {
-	authHeader := ctx.GetHeader("Authorization")
-
-	if authHeader == "" {
-		ctx.JSON(http.StatusBadRequest,
-			dto.Response{
-				Success:  false,
-				Messages: "Error missing token",
-				Results:  nil,
-			})
-		return
-	}
-
-	token := strings.TrimPrefix(authHeader, "Bearer ")
-	token = strings.TrimSpace(token)
-
-	claims, err := lib.VerifyJWT(token)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, dto.Response{
-			Success:  false,
-			Messages: err.Error(),
-			Results:  nil,
-		})
-		return
-	}
-
-	user, err := u.userService.GetUserById(claims.User_id)
-
-	if err != nil {
-		ctx.JSON(http.StatusOK, dto.Response{
-			Success:  false,
-			Messages: err.Error(),
-			Results:  nil,
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, dto.Response{
-		Success:  true,
-		Messages: "Get User Data!",
-		Results:  user,
 	})
 }
 
