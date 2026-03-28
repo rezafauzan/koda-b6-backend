@@ -26,6 +26,7 @@ func main() {
 
 	routers.NewAuthRouters(router, container)
 	routers.NewUserRouters(router, container)
+	routers.NewUserProfileRouters(router, container)
 	routers.NewRoleRouters(router, container)
 	routers.NewForgotPasswordRouters(router, container)
 
