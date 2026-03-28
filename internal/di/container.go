@@ -36,13 +36,13 @@ func (c *Container) initDependencies() {
 	userService := services.NewUserService(userRepo)
 	c.UserHandler = handlers.NewUserHandler(userService)
 	
-	userProfileRepo, _ := repository.NewUserRepository(c.db)
-	userProfileService := services.NewUserService(userProfileRepo)
-	c.UserHandler = handlers.NewUserHandler(userProfileService)
+	userProfileRepo, _ := repository.NewUserProfileRepository(c.db)
+	userProfileService := services.NewUserProfileService(userProfileRepo)
+	c.UserProfileHandler = handlers.NewUserProfileHandler(userProfileService)
 
-	userCredentialRepo, _ := repository.NewUserRepository(c.db)
-	userCredentialService := services.NewUserService(userCredentialRepo)
-	c.UserHandler = handlers.NewUserHandler(userCredentialService)
+	userCredentialRepo, _ := repository.NewUserCredentialRepository(c.db)
+	userCredentialService := services.NewUserCredentialService(userCredentialRepo)
+	c.UserCredentialHandler = handlers.NewUserCredentialHandler(userCredentialService)
 
 	authService := services.NewAuthService(userRepo)
 	c.AuthHandler = handlers.NewAuthHandler(authService)
