@@ -25,11 +25,3 @@ type CreateUserDTO struct {
 	Password         string `json:"password"`
 	Password_confirm string `json:"password_confirm"`
 }
-
-type UpdateUserProfileDTO struct {
-	Id          int    `json:"id"`
-	First_name  string `json:"first_name"`
-	Last_name   string `json:"last_name"`
-	Address     string `json:"address"`
-	User_avatar string `json:"user_avatar"`
-}
