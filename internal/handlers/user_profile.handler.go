@@ -5,7 +5,6 @@ import (
 	"rezafauzan/koda-b6-golang/internal/dto"
 	"rezafauzan/koda-b6-golang/internal/lib"
 	"rezafauzan/koda-b6-golang/internal/services"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -19,51 +18,6 @@ func NewUserProfileHandler(userProfileService *services.UserProfileService) *Use
 	return &UserProfileHandler{
 		userProfileService: userProfileService,
 	}
-}
-
-func (u UserProfileHandler) GetAllUserProfiles(ctx *gin.Context) {
-	list, err := u.userProfileService.GetAllUserProfile()
-	if err != nil {
-		ctx.JSON(http.StatusOK, dto.Response{
-			Success:  false,
-			Messages: "Failed to create response get all user profiles! : " + err.Error(),
-			Results:  nil,
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, dto.Response{
-		Success:  true,
-		Messages: "GET all user profiles",
-		Results:  list,
-	})
-}
-
-func (u UserProfileHandler) CreateNewUserProfile(ctx *gin.Context) {
-	var body dto.CreateUserProfileDTO
-	err := ctx.ShouldBind(&body)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, dto.Response{
-			Success:  false,
-			Messages: err.Error(),
-			Results:  nil,
-		})
-		return
-	}
-	result, err := u.userProfileService.CreateNewUserProfile(body)
-	if err != nil {
-		ctx.JSON(http.StatusOK, dto.Response{
-			Success:  false,
-			Messages: err.Error(),
-			Results:  nil,
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, dto.Response{
-		Success:  true,
-		Messages: "Create User Profile Success !",
-		Results:  result,
-	})
 }
 
 func (u UserProfileHandler) GetUserProfile(ctx *gin.Context) {
@@ -112,9 +66,19 @@ func (u UserProfileHandler) GetUserProfile(ctx *gin.Context) {
 }
 
 func (u UserProfileHandler) UpdateUserProfile(ctx *gin.Context) {
-	var body dto.UpdateUserProfileEntityDTO
-	ctx.ShouldBind(&body)
-	updated, err := u.userProfileService.UpdateUserProfileEntity(body)
+	var newData dto.UpdateUserProfileDTO
+	ctx.ShouldBind(&newData)
+	user_id, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(http.StatusOK, dto.Response{
+			Success:  false,
+			Messages: "Invalid or expired token",
+			Results:  nil,
+		})
+		return
+	}
+
+	updated, err := u.userProfileService.UpdateUserProfile(newData, user_id.(int))
 	if err != nil {
 		ctx.JSON(http.StatusOK, dto.Response{
 			Success:  false,
@@ -127,32 +91,5 @@ func (u UserProfileHandler) UpdateUserProfile(ctx *gin.Context) {
 		Success:  true,
 		Messages: "Update User Profile Success !",
 		Results:  updated,
-	})
-}
-
-func (u UserProfileHandler) DeleteUserProfile(ctx *gin.Context) {
-	idParam := ctx.Param("id")
-	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, dto.Response{
-			Success:  false,
-			Messages: "Invalid user profile id !",
-			Results:  nil,
-		})
-		return
-	}
-	deleted, err := u.userProfileService.DeleteUserProfile(id)
-	if err != nil {
-		ctx.JSON(http.StatusOK, dto.Response{
-			Success:  false,
-			Messages: "Delete user profile failed : " + err.Error(),
-			Results:  nil,
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, dto.Response{
-		Success:  true,
-		Messages: "Delete User Profile Success !",
-		Results:  deleted,
 	})
 }

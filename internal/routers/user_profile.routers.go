@@ -15,7 +15,7 @@ type UserProfileRouter struct {
 func NewUserProfileRouters(router *gin.Engine, container *di.Container) {
 	userProfileRoutes := router.Group("/profile")
 	{
-		userProfileRoutes.GET("", middleware.AuthMiddleware() ,container.UserProfileHandler.GetUserProfile)
+		userProfileRoutes.GET("", middleware.AuthMiddleware(), container.UserProfileHandler.GetUserProfile)
 
 		userProfileRoutes.PATCH("", middleware.AuthMiddleware(), container.UserProfileHandler.UpdateUserProfile)
 	}
