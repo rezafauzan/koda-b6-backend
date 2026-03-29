@@ -17,65 +17,47 @@ func NewUserProfileService(userProfileRepo *repository.UserProfileRepository) *U
 	}
 }
 
-func (u UserProfileService) CreateNewUserProfile(newData dto.CreateUserProfileDTO) (dto.UserProfileResponseDTO, error) {
-	if newData.User_id <= 0 {
-		return dto.UserProfileResponseDTO{}, errors.New("Failed to create user profile! : User id is required !")
-	}
-	if len(newData.First_name) < 4 {
-		return dto.UserProfileResponseDTO{}, errors.New("Failed to create user profile! : First name length minimum is 4 characters !")
-	}
-	if len(newData.Last_name) < 4 {
-		return dto.UserProfileResponseDTO{}, errors.New("Failed to create user profile! : Last name length minimum is 4 characters !")
-	}
-	if len(newData.Address) < 10 {
-		return dto.UserProfileResponseDTO{}, errors.New("Failed to create user profile! : Address length minimum is 10 characters !")
-	}
-	if newData.User_avatar != "" && len(newData.User_avatar) < 10 {
-		return dto.UserProfileResponseDTO{}, errors.New("Failed to create user profile! : User avatar length minimum is 10 characters !")
-	}
-
-	m := &models.UserProfile{
-		UserId: newData.User_id, UserAvatar: newData.User_avatar, FirstName: newData.First_name,
-		LastName: newData.Last_name, Address: newData.Address,
-	}
-	created, err := u.userProfileRepo.CreateUserProfile(m)
-	if err != nil {
-		return dto.UserProfileResponseDTO{}, errors.New("Failed to create user profile: " + err.Error())
-	}
-	return dto.UserProfileResponseFromModel(created), nil
-}
-
-func (u UserProfileService) GetAllUserProfile() ([]dto.UserProfileResponseDTO, error) {
-	list, err := u.userProfileRepo.GetAllUserProfiles()
-	if err != nil {
-		return []dto.UserProfileResponseDTO{}, err
-	}
-	out := make([]dto.UserProfileResponseDTO, 0, len(list))
-	for _, x := range list {
-		out = append(out, dto.UserProfileResponseFromModel(x))
-	}
-	return out, nil
-}
-
-func (u UserProfileService) GetUserProfileById(id int) (dto.UserProfileResponseDTO, error) {
-	profile, err := u.userProfileRepo.GetUserProfileById(id)
-	if err != nil {
-		return dto.UserProfileResponseDTO{}, errors.New("User profile not found !")
-	}
-	return dto.UserProfileResponseFromModel(profile), nil
-}
-
-func (u *UserProfileService) GetUserProfileByUserId(user_id int) (dto.UserProfileResponseDTO, error) {
-	profile, err := u.userProfileRepo.GetUserProfileByUserId(user_id)
+func (u *UserProfileService) GetUserProfileByUserId(userId int) (dto.UserProfileResponseDTO, error) {
+	profile, err := u.userProfileRepo.GetUserProfileByUserId(userId)
 
 	if err != nil {
 		return dto.UserProfileResponseDTO{}, errors.New("User profile not found !")
 	}
 
-	return dto.UserProfileResponseFromModel(profile), nil
+	modeledData := dto.UserProfileResponseDTO{
+		Id:         profile.Id,
+		UserId:     profile.UserId,
+		UserAvatar: profile.UserAvatar,
+		FirstName:  profile.FirstName,
+		LastName:   profile.LastName,
+		Address:    profile.Address,
+	}
+
+	return modeledData, nil
 }
 
-func (u UserProfileService) UpdateUserProfileEntity(newData dto.UpdateUserProfileEntityDTO) (dto.UserProfileResponseDTO, error) {
+func (u UserProfileService) UpdateUserProfile(newData dto.UpdateUserProfileDTO, userId int) (dto.UserProfileResponseDTO, error) {
+	userProfile, err := u.GetUserProfileByUserId(userId)
+	if err != nil {
+		return dto.UserProfileResponseDTO{}, err
+	}
+
+	if newData.User_avatar == "" {
+		newData.User_avatar = userProfile.UserAvatar
+	}
+
+	if newData.First_name == "" {
+		newData.First_name = userProfile.FirstName
+	}
+
+	if newData.Last_name == "" {
+		newData.Last_name = userProfile.LastName
+	}
+
+	if newData.Address == "" {
+		newData.Address = userProfile.Address
+	}
+
 	if newData.First_name != "" && len(newData.First_name) < 4 {
 		return dto.UserProfileResponseDTO{}, errors.New("First name minimum 4 characters")
 	}
@@ -89,25 +71,28 @@ func (u UserProfileService) UpdateUserProfileEntity(newData dto.UpdateUserProfil
 		return dto.UserProfileResponseDTO{}, errors.New("User avatar minimum 10 characters")
 	}
 
-	m := models.UserProfile{
-		Id: newData.Id, UserId: newData.User_id, UserAvatar: newData.User_avatar,
-		FirstName: newData.First_name, LastName: newData.Last_name, Address: newData.Address,
+	modeledData := models.UserProfile{
+		Id:         newData.Id,
+		UserId:     userId,
+		UserAvatar: newData.User_avatar,
+		FirstName:  newData.First_name,
+		LastName:   newData.Last_name,
+		Address:    newData.Address,
 	}
-	updated, err := u.userProfileRepo.UpdateUserProfile(m)
+
+	updated, err := u.userProfileRepo.UpdateUserProfile(modeledData)
 	if err != nil {
 		return dto.UserProfileResponseDTO{}, err
 	}
-	return dto.UserProfileResponseFromModel(updated), nil
-}
-
-func (u UserProfileService) DeleteUserProfile(id int) (dto.UserProfileResponseDTO, error) {
-	x, err := u.userProfileRepo.GetUserProfileById(id)
-	if err != nil {
-		return dto.UserProfileResponseDTO{}, errors.New("User profile not found !")
+	response := dto.UserProfileResponseDTO{
+		Id:         updated.Id,
+		UserId:     updated.UserId,
+		UserAvatar: updated.UserAvatar,
+		FirstName:  updated.FirstName,
+		LastName:   updated.LastName,
+		Address:    updated.Address,
+		CreatedAt:  updated.CreatedAt,
+		UpdatedAt:  updated.UpdatedAt,
 	}
-	err = u.userProfileRepo.DeleteUserProfile(id)
-	if err != nil {
-		return dto.UserProfileResponseDTO{}, errors.New("Failed to delete user profile: " + err.Error())
-	}
-	return dto.UserProfileResponseFromModel(x), nil
+	return response, nil
 }
