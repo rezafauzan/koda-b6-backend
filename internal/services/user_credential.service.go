@@ -18,43 +18,70 @@ func NewUserCredentialService(userCredentialRepo *repository.UserCredentialRepos
 	}
 }
 
-func (u UserCredentialService) GetAllUserCredential() ([]dto.UserCredentialResponseDTO, error) {
-	list, err := u.userCredentialRepo.GetAllUserCredentials()
+func (u UserCredentialService) GetUserCredentialByUserId(userId int) (dto.UserCredentialResponseWithoutPasswordDTO, error) {
+	userCredentials, err := u.userCredentialRepo.GetUserCredentialByUserId(userId)
 	if err != nil {
-		return []dto.UserCredentialResponseDTO{}, err
+		return dto.UserCredentialResponseWithoutPasswordDTO{}, errors.New("User credential not found !")
 	}
-	out := make([]dto.UserCredentialResponseDTO, 0, len(list))
-	for _, x := range list {
-		out = append(out, dto.UserCredentialResponseFromModel(x))
+	response := dto.UserCredentialResponseWithoutPasswordDTO{
+		Id:        userCredentials.Id,
+		UserId:    userCredentials.Id,
+		Email:     userCredentials.Email,
+		Phone:     userCredentials.Phone,
+		CreatedAt: userCredentials.CreatedAt,
+		UpdatedAt: userCredentials.UpdatedAt,
 	}
-	return out, nil
-}
-
-func (u UserCredentialService) GetUserCredentialById(id int) (dto.UserCredentialResponseDTO, error) {
-	x, err := u.userCredentialRepo.GetUserCredentialById(id)
-	if err != nil {
-		return dto.UserCredentialResponseDTO{}, errors.New("User credential not found !")
-	}
-	return dto.UserCredentialResponseFromModel(x), nil
+	return response, nil
 }
 
 func (u UserCredentialService) UpdateUserCredential(newData dto.UpdateUserCredentialDTO) (dto.UserCredentialResponseDTO, error) {
-	if newData.Email != "" && !strings.Contains(newData.Email, "@") {
-		return dto.UserCredentialResponseDTO{}, errors.New("Invalid email format")
-	}
-	if newData.Phone != "" && len(newData.Phone) < 10 {
-		return dto.UserCredentialResponseDTO{}, errors.New("Phone minimum 10 digits")
-	}
-	if newData.Password != "" && len(newData.Password) < 8 {
-		return dto.UserCredentialResponseDTO{}, errors.New("Password minimum 8 characters")
-	}
-
-	m := models.UserCredential{
-		Id: newData.Id, UserId: newData.User_id, Email: newData.Email, Phone: newData.Phone, Password: newData.Password,
-	}
-	updated, err := u.userCredentialRepo.UpdateUserCredential(m)
+	userCredentials, err := u.userCredentialRepo.GetUserCredentialsByEmail(newData.Email)
 	if err != nil {
 		return dto.UserCredentialResponseDTO{}, err
 	}
-	return dto.UserCredentialResponseFromModel(updated), nil
+
+	if newData.Email == "" {
+		newData.Email = userCredentials.Email
+	}
+	if newData.Phone == "" {
+		newData.Phone = userCredentials.Phone
+	}
+	if newData.Password == "" {
+		newData.Password = userCredentials.Password
+	} else {
+		if len(newData.Password) < 8 {
+			return dto.UserCredentialResponseDTO{}, errors.New("Password minimum 8 characters")
+		}
+		if newData.Password != "" && newData.ConfirmPassword != newData.Password {
+			return dto.UserCredentialResponseDTO{}, errors.New("Confirm password not matched")
+		}
+	}
+
+	if !strings.Contains(newData.Email, "@") {
+		return dto.UserCredentialResponseDTO{}, errors.New("Invalid email format")
+	}
+	if len(newData.Phone) < 10 {
+		return dto.UserCredentialResponseDTO{}, errors.New("Phone minimum 10 digits")
+	}
+
+	modeledData := models.UserCredential{
+		Id:       userCredentials.Id,
+		UserId:   userCredentials.UserId,
+		Email:    newData.Email,
+		Phone:    newData.Phone,
+		Password: newData.Password,
+	}
+
+	updated, err := u.userCredentialRepo.UpdateUserCredential(modeledData)
+	if err != nil {
+		return dto.UserCredentialResponseDTO{}, err
+	}
+
+	response := dto.UserCredentialResponseDTO{
+		Id:     updated.Id,
+		UserId: updated.UserId,
+		Email:  updated.Email,
+		Phone:  updated.Phone,
+	}
+	return response, nil
 }
