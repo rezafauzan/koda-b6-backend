@@ -44,7 +44,7 @@ func (c *Container) initDependencies() {
 	userCredentialService := services.NewUserCredentialService(userCredentialRepo)
 	c.UserCredentialHandler = handlers.NewUserCredentialHandler(userCredentialService)
 
-	authService := services.NewAuthService(userRepo)
+	authService := services.NewAuthService(userCredentialRepo)
 	c.AuthHandler = handlers.NewAuthHandler(authService)
 
 	roleRepo, _ := repository.NewRoleRepository(c.db)
