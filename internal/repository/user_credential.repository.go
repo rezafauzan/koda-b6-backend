@@ -20,29 +20,14 @@ func NewUserCredentialRepository(db *pgxpool.Pool) (*UserCredentialRepository, e
 	}, nil
 }
 
-func (u UserCredentialRepository) GetAllUserCredentials() ([]models.UserCredential, error) {
-	sql := `SELECT id, user_id, email, phone, password, created_at, updated_at FROM user_credentials`
-	rows, err := u.db.Query(context.Background(), sql)
-	if err != nil {
-		return []models.UserCredential{}, err
-	}
-
-	userCredentials, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.UserCredential])
-	if err != nil {
-		return []models.UserCredential{}, errors.New("Failed to create response get all user credentials! : " + err.Error())
-	}
-
-	return userCredentials, nil
-}
-
-func (u UserCredentialRepository) GetUserCredentialById(id int) (models.UserCredential, error) {
-	sql := `SELECT id, user_id, email, phone, password, created_at, updated_at FROM user_credentials WHERE id = $1`
-	rows, err := u.db.Query(context.Background(), sql, id)
+func (u UserCredentialRepository) GetUserCredentialByUserId(userId int) (models.UserCredential, error) {
+	sql := `SELECT id, user_id, email, phone, password, created_at, updated_at FROM user_credentials WHERE user_id = $1`
+	rows, err := u.db.Query(context.Background(), sql, userId)
 	if err != nil {
 		return models.UserCredential{}, err
 	}
 
-	userCredential, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[models.UserCredential])
+	userCredential, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.UserCredential])
 	if err != nil {
 		return models.UserCredential{}, err
 	}
@@ -51,34 +36,29 @@ func (u UserCredentialRepository) GetUserCredentialById(id int) (models.UserCred
 }
 
 func (u UserCredentialRepository) UpdateUserCredential(newData models.UserCredential) (models.UserCredential, error) {
-	userCredential, err := u.GetUserCredentialById(newData.Id)
+	sql := `UPDATE user_credentials SET email = $1, phone = $2, password = $3, updated_at = $4 WHERE user_id = $5 RETURNING id, user_id, email, phone, password, created_at, updated_at`
+
+	rows, err := u.db.Query(context.Background(), sql, newData.Email, newData.Phone, newData.Password, time.Now(), newData.UserId)
+	if err != nil {
+		return models.UserCredential{}, err
+	}
+	updatedUserCredentials, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.UserCredential])
 	if err != nil {
 		return models.UserCredential{}, err
 	}
 
-	if newData.Email == "" {
-		newData.Email = userCredential.Email
-	}
 
-	if newData.Phone == "" {
-		newData.Phone = userCredential.Phone
-	}
+	return updatedUserCredentials, nil
+}
 
-	if newData.Password == "" {
-		newData.Password = userCredential.Password
-	}
-
-	sql := `UPDATE user_credentials SET user_id = $1, email = $2, phone = $3, password = $4, updated_at = $5 WHERE id = $6`
-
-	_, err = u.db.Exec(context.Background(), sql, newData.UserId, newData.Email, newData.Phone, newData.Password, time.Now(), newData.Id)
+func (u UserCredentialRepository) GetUserCredentialsByEmail(email string) (models.UserCredential, error) {
+	sql := `SELECT id, user_id, email, phone, password, created_at, updated_at FROM user_credentials WHERE email = $1`
+	rows, err := u.db.Query(context.Background(), sql, email)
+	userCredentials, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.UserCredential])
 	if err != nil {
-		return models.UserCredential{}, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			return models.UserCredential{}, errors.New("User credentials not found")
+		}
 	}
-
-	updatedUserCredential, err := u.GetUserCredentialById(newData.Id)
-	if err != nil {
-		return models.UserCredential{}, err
-	}
-
-	return updatedUserCredential, nil
+	return userCredentials, nil
 }
