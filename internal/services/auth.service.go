@@ -9,12 +9,12 @@ import (
 )
 
 type AuthService struct {
-	userRepo *repository.UserRepository
+	userCredentialsRepo *repository.UserCredentialRepository
 }
 
-func NewAuthService(userRepo *repository.UserRepository) *AuthService {
+func NewAuthService(userCredentialsRepo *repository.UserCredentialRepository) *AuthService {
 	return &AuthService{
-		userRepo: userRepo,
+		userCredentialsRepo: userCredentialsRepo,
 	}
 }
 
@@ -23,22 +23,22 @@ func (a AuthService) Login(req dto.LoginRequestDTO) (dto.LoginResponseDTO, error
 		return dto.LoginResponseDTO{}, errors.New("Failed to login! : Invalid email format !")
 	}
 
-	userCred, err := a.userRepo.GetUserCredentialsByEmail(req.Email)
+	userCredentials, err := a.userCredentialsRepo.GetUserCredentialsByEmail(req.Email)
 	if err != nil {
 		return dto.LoginResponseDTO{}, errors.New("Failed to get user credentials by email : " + err.Error())
 	}
 
-	if req.Password != userCred.Password {
+	if req.Password != userCredentials.Password {
 		return dto.LoginResponseDTO{}, errors.New("Failed to login! : Invalid email or password !")
 	}
 
-	user, _, err := a.userRepo.GetUserByEmail(req.Email)
+	user, err := a.userCredentialsRepo.GetUserCredentialsByEmail(req.Email)
 	
 	if err != nil {
 		return dto.LoginResponseDTO{}, errors.New("Failed to get user by email : " + err.Error())
 	}
 
-	token, err := lib.GenerateToken(user)
+	token, err := lib.GenerateToken(user.UserId)
 
 	if err != nil {
 		return dto.LoginResponseDTO{}, errors.New("Failed to generate token : " + err.Error())
