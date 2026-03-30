@@ -3,9 +3,7 @@ package handlers
 import (
 	"net/http"
 	"rezafauzan/koda-b6-golang/internal/dto"
-	"rezafauzan/koda-b6-golang/internal/lib"
 	"rezafauzan/koda-b6-golang/internal/services"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,33 +19,19 @@ func NewUserProfileHandler(userProfileService *services.UserProfileService) *Use
 }
 
 func (u UserProfileHandler) GetUserProfile(ctx *gin.Context) {
-	authHeader := ctx.GetHeader("Authorization")
-
-	if authHeader == "" {
-		ctx.JSON(http.StatusBadRequest,
-			dto.Response{
-				Success:  false,
-				Messages: "Error missing token",
-				Results:  nil,
-			})
-		return
-	}
-
-	token := strings.TrimPrefix(authHeader, "Bearer ")
-	token = strings.TrimSpace(token)
-
-	claims, err := lib.VerifyJWT(token)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, dto.Response{
+	var newData dto.UpdateUserProfileDTO
+	ctx.ShouldBind(&newData)
+	userId, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(http.StatusOK, dto.Response{
 			Success:  false,
-			Messages: err.Error(),
+			Messages: "Invalid or expired token",
 			Results:  nil,
 		})
 		return
 	}
 
-	user, err := u.userProfileService.GetUserProfileByUserId(claims.User_id)
+	user, err := u.userProfileService.GetUserProfileByUserId(userId.(int))
 
 	if err != nil {
 		ctx.JSON(http.StatusOK, dto.Response{
@@ -68,7 +52,7 @@ func (u UserProfileHandler) GetUserProfile(ctx *gin.Context) {
 func (u UserProfileHandler) UpdateUserProfile(ctx *gin.Context) {
 	var newData dto.UpdateUserProfileDTO
 	ctx.ShouldBind(&newData)
-	user_id, exist := ctx.Get("user_id")
+	userId, exist := ctx.Get("user_id")
 	if !exist {
 		ctx.JSON(http.StatusOK, dto.Response{
 			Success:  false,
@@ -78,7 +62,7 @@ func (u UserProfileHandler) UpdateUserProfile(ctx *gin.Context) {
 		return
 	}
 
-	updated, err := u.userProfileService.UpdateUserProfile(newData, user_id.(int))
+	updated, err := u.userProfileService.UpdateUserProfile(newData, userId.(int))
 	if err != nil {
 		ctx.JSON(http.StatusOK, dto.Response{
 			Success:  false,
