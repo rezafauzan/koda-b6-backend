@@ -18,12 +18,21 @@ func NewUserCredentialHandler(userCredentialService *services.UserCredentialServ
 	}
 }
 
-func (u UserCredentialHandler) GetAllUserCredentials(ctx *gin.Context) {
-	list, err := u.userCredentialService.GetAllUserCredential()
-	if err != nil {
-		ctx.JSON(http.StatusOK, dto.Response{
+func (u UserCredentialHandler) GetUserCredentialsByUserId(ctx *gin.Context) {
+	userId, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
 			Success:  false,
-			Messages: "Failed to create response get all user credentials! : " + err.Error(),
+			Messages: "Invalid or expired token",
+			Results:  nil,
+		})
+		return
+	}
+	userCredentials, err := u.userCredentialService.GetUserCredentialByUserId(userId.(int))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
+			Success:  false,
+			Messages: "Failed to create response get user credentials! : " + err.Error(),
 			Results:  nil,
 		})
 		return
@@ -31,8 +40,8 @@ func (u UserCredentialHandler) GetAllUserCredentials(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, dto.Response{
 		Success:  true,
-		Messages: "GET all user credentials",
-		Results:  list,
+		Messages: "GET user credentials",
+		Results:  userCredentials,
 	})
 }
 
@@ -41,7 +50,7 @@ func (u UserCredentialHandler) UpdateUserCredential(ctx *gin.Context) {
 	ctx.ShouldBind(&body)
 	updated, err := u.userCredentialService.UpdateUserCredential(body)
 	if err != nil {
-		ctx.JSON(http.StatusOK, dto.Response{
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
 			Success:  false,
 			Messages: err.Error(),
 			Results:  nil,
