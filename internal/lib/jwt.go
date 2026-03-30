@@ -3,22 +3,19 @@ package lib
 import (
 	"errors"
 	"os"
-	"rezafauzan/koda-b6-golang/internal/dto"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type CustomClaims struct {
-	User_id int    `json:"id"`
-	Role    string `json:"role_id"`
+	UserId int    `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(user dto.UserResponseDTO) (string, error) {
+func GenerateToken(userId int) (string, error) {
 	claims := CustomClaims{
-		User_id: user.Id,
-		Role:    user.Role_name,
+		UserId: userId,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -50,6 +47,6 @@ func VerifyJWT(tokenString string) (*CustomClaims, error) {
 	if !token.Valid {
 		return nil, errors.New("invalid token")
 	}
-
+	
 	return claims, nil
 }
