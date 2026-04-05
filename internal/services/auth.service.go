@@ -11,12 +11,13 @@ import (
 type AuthService struct {
 	userCredentialsRepo *repository.UserCredentialRepository
 	userRepo            *repository.UserRepository
+	cartItemRepo        *repository.CartItemRepository
 }
 
 func NewAuthService(userCredentialsRepo *repository.UserCredentialRepository, userRepo *repository.UserRepository) *AuthService {
 	return &AuthService{
 		userCredentialsRepo: userCredentialsRepo,
-		userRepo: userRepo,
+		userRepo:            userRepo,
 	}
 }
 
@@ -35,12 +36,13 @@ func (a AuthService) Login(req dto.LoginRequestDTO) (dto.LoginResponseDTO, error
 	}
 
 	user, err := a.userCredentialsRepo.GetUserCredentialsByEmail(req.Email)
+	userCart, err := a.cartItemRepo.GetCartByUserId(user.Id)
 
 	if err != nil {
 		return dto.LoginResponseDTO{}, errors.New("Failed to get user by email : " + err.Error())
 	}
 
-	token, err := lib.GenerateToken(user.UserId)
+	token, err := lib.GenerateToken(user.UserId, userCart.UserId)
 
 	if err != nil {
 		return dto.LoginResponseDTO{}, errors.New("Failed to generate token : " + err.Error())
@@ -85,6 +87,6 @@ func (a AuthService) Register(newUser dto.CreateUserDTO) (dto.CreateUserDTO, err
 	if phoneExist {
 		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : Phone number allready used !")
 	}
-	
+
 	return a.userRepo.CreateNewUser(newUser)
 }
