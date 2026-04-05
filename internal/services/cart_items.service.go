@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"rezafauzan/koda-b6-golang/internal/dto"
 	"rezafauzan/koda-b6-golang/internal/models"
 	"rezafauzan/koda-b6-golang/internal/repository"
@@ -15,6 +16,26 @@ func NewCartItemService(repo *repository.CartItemRepository) *CartItemService {
 }
 
 func (s *CartItemService) AddItem(newCartItemData dto.CreateCartItemRequestDTO) (models.CartItem, error) {
+	if newCartItemData.ProductId <= 0 {
+		return models.CartItem{}, errors.New("Failed to add item! : Product ID is required !")
+	}
+
+	if len(newCartItemData.Size) == 0 {
+		return models.CartItem{}, errors.New("Failed to add item! : Size is required !")
+	}
+
+	if len(newCartItemData.Hotice) == 0 {
+		return models.CartItem{}, errors.New("Failed to add item! : Hot/Ice must be filled !")
+	}
+
+	if newCartItemData.Hotice != "hot" && newCartItemData.Hotice != "ice" {
+		return models.CartItem{}, errors.New("Failed to add item! : Hotice must be either 'hot' or 'ice' !")
+	}
+
+	if newCartItemData.Quantity <= 0 {
+		return models.CartItem{}, errors.New("Failed to add item! : Quantity minimum is 1 !")
+	}
+
 	result, err := s.repo.AddItem(newCartItemData)
 	if err != nil {
 		return models.CartItem{}, err

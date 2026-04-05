@@ -34,7 +34,7 @@ func (c *CartItemRepository) AddItem(item dto.CreateCartItemRequestDTO) (models.
 }
 
 func (c *CartItemRepository) GetCartByUserId(userId int) (models.Cart, error) {
-	sql := `SELECT id,user_id,created_at,updated_at FROM carts WHERE user_id = $1`
+	sql := `SELECT id, user_id, created_at, updated_at FROM carts WHERE user_id = $1`
 
 	rows, err := c.db.Query(context.Background(), sql, userId)
 	if err != nil {
