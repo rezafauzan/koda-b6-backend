@@ -44,6 +44,7 @@ func main() {
 	routers.NewRoleRouters(router, container)
 	routers.NewForgotPasswordRouters(router, container)
 	routers.NewProductRouter(router, container)
+	routers.NewCartItemRouters(router, container)
 
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
