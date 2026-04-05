@@ -22,8 +22,18 @@ func NewUserRepository(db *pgxpool.Pool) (*UserRepository, error) {
 }
 
 func (u UserRepository) CreateNewUser(newUser dto.CreateUserDTO) (dto.CreateUserDTO, error) {
+	tx, err := u.db.BeginTx(context.Background(), pgx.TxOptions{})
+	if err != nil {
+		return dto.CreateUserDTO{}, errors.New("failed to start transaction: " + err.Error())
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback(context.Background())
+		}
+	}()
+
 	sql := "INSERT INTO users (role_id,verified,created_at,updated_at) VALUES ($1, $2, $3, $4) RETURNING id, role_id, verified, created_at,updated_at"
-	rows, err := u.db.Query(context.Background(), sql, 2, true, time.Now(), time.Now())
+	rows, err := tx.Query(context.Background(), sql, 2, true, time.Now(), time.Now())
 	if err != nil {
 		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
 	}
@@ -34,15 +44,27 @@ func (u UserRepository) CreateNewUser(newUser dto.CreateUserDTO) (dto.CreateUser
 	}
 
 	sql = "INSERT INTO user_credentials (user_id, email, phone, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)"
-	_, err = u.db.Exec(context.Background(), sql, registeredUser.Id, newUser.Email, newUser.Phone, newUser.Password, time.Now(), time.Now())
+	_, err = tx.Exec(context.Background(), sql, registeredUser.Id, newUser.Email, newUser.Phone, newUser.Password, time.Now(), time.Now())
 
 	if err != nil {
 		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
 	}
 
 	sql = "INSERT INTO user_profiles (user_id, user_avatar, first_name, last_name, address, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
-	_, err = u.db.Exec(context.Background(), sql, registeredUser.Id, "https://i.pravatar.cc/400?img=4", newUser.First_name, newUser.Last_name, newUser.Address, time.Now(), time.Now())
+	_, err = tx.Exec(context.Background(), sql, registeredUser.Id, "https://i.pravatar.cc/400?img=4", newUser.First_name, newUser.Last_name, newUser.Address, time.Now(), time.Now())
 
+	if err != nil {
+		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
+	}
+
+	sql = "INSERT INTO carts (user_id, created_at, updated_at) VALUES ($1,$2,$3) RETURNING id, user_id, created_at, updated_at"
+	_, err = tx.Exec(context.Background(), sql, registeredUser.Id, time.Now(), time.Now())
+
+	if err != nil {
+		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
+	}
+
+	err = tx.Commit(context.Background())
 	if err != nil {
 		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : " + err.Error())
 	}

@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS product_campaigns (
 
 CREATE TABLE IF NOT EXISTS carts(
     id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP
 );
