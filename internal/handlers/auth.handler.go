@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"rezafauzan/koda-b6-golang/internal/dto"
 	"rezafauzan/koda-b6-golang/internal/services"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,21 +43,9 @@ func (u AuthHandler) Login(ctx *gin.Context) {
 	}
 	result, err := u.authService.Login(req)
 	if err != nil {
-		msg := err.Error()
-		status := http.StatusInternalServerError
-		switch {
-		case strings.Contains(msg, "Invalid email format"):
-			status = http.StatusBadRequest
-		case strings.Contains(msg, "Invalid email or password"):
-			status = http.StatusUnauthorized
-		case strings.Contains(msg, "Failed to get user credentials by email"):
-			status = http.StatusUnauthorized
-		case strings.Contains(msg, "Failed to get user by email"):
-			status = http.StatusUnauthorized
-		}
-		ctx.JSON(status, dto.Response{
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
 			Success: false,
-			Message: msg,
+			Message: "Login failed " + err.Error(),
 			Data:    nil,
 		})
 		return

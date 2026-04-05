@@ -46,9 +46,6 @@ func (c *Container) initDependencies() {
 	userCredentialService := services.NewUserCredentialService(userCredentialRepo)
 	c.UserCredentialHandler = handlers.NewUserCredentialHandler(userCredentialService)
 
-	authService := services.NewAuthService(userCredentialRepo, userRepo)
-	c.AuthHandler = handlers.NewAuthHandler(authService)
-
 	roleRepo, _ := repository.NewRoleRepository(c.db)
 	roleService := services.NewRoleService(roleRepo)
 	c.RoleHandler = handlers.NewRoleHandler(roleService)
@@ -60,6 +57,9 @@ func (c *Container) initDependencies() {
 	cartItemRepo := repository.NewCartItemRepository(c.db)
 	cartItemService := services.NewCartItemService(cartItemRepo)
 	c.CartItemHandler = handlers.NewCartItemHandler(cartItemService)
+
+	authService := services.NewAuthService(userCredentialRepo, userRepo, cartItemRepo)
+	c.AuthHandler = handlers.NewAuthHandler(authService)
 
 	forgotPasswordRepo, _ := repository.NewForgotPasswordRepository(c.db)
 	forgotPasswordService := services.NewForgotPasswordService(forgotPasswordRepo, userRepo)

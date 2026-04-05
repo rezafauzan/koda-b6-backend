@@ -14,7 +14,7 @@ type AuthService struct {
 	cartItemRepo        *repository.CartItemRepository
 }
 
-func NewAuthService(userCredentialsRepo *repository.UserCredentialRepository, userRepo *repository.UserRepository) *AuthService {
+func NewAuthService(userCredentialsRepo *repository.UserCredentialRepository, userRepo *repository.UserRepository, cartItemRepo *repository.CartItemRepository) *AuthService {
 	return &AuthService{
 		userCredentialsRepo: userCredentialsRepo,
 		userRepo:            userRepo,
