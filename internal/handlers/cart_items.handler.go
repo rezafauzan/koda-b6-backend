@@ -29,9 +29,20 @@ func NewCartItemHandler(cartItemService *services.CartItemService) *CartItemHand
 // @Failure      500  {object}  dto.Response
 // @Router       /cart-items [post]
 func (c CartItemHandler) AddItem(ctx *gin.Context) {
+	cartId, exist := ctx.Get("cart_id")
+	if !exist {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "Invalid token",
+			Data:    nil,
+		})
+		return
+	}
+
 	var newCartItemData dto.CreateCartItemRequestDTO
 
-	if err := ctx.ShouldBindJSON(&newCartItemData); err != nil {
+	err := ctx.ShouldBindJSON(&newCartItemData)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
 			Success: false,
 			Message: "Invalid request body",
@@ -39,7 +50,8 @@ func (c CartItemHandler) AddItem(ctx *gin.Context) {
 		})
 		return
 	}
-
+	newCartItemData.CartId = cartId.(int)
+	
 	result, err := c.cartItemService.AddItem(newCartItemData)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.Response{
@@ -68,10 +80,8 @@ func (c CartItemHandler) AddItem(ctx *gin.Context) {
 // @Failure      500  {object}  dto.Response
 // @Router       /cart-items/cart/{cartId} [get]
 func (c CartItemHandler) GetCartItemsByCartId(ctx *gin.Context) {
-	cartIdParam := ctx.Param("cartId")
-
-	cartId, err := strconv.Atoi(cartIdParam)
-	if err != nil {
+	cartId, exist := ctx.Get("cart_id")
+	if !exist {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
 			Success: false,
 			Message: "Invalid cart id",
@@ -80,7 +90,7 @@ func (c CartItemHandler) GetCartItemsByCartId(ctx *gin.Context) {
 		return
 	}
 
-	result, err := c.cartItemService.GetCartItemsByCartId(cartId)
+	result, err := c.cartItemService.GetCartItemsByCartId(cartId.(int))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.Response{
 			Success: false,
