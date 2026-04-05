@@ -76,8 +76,8 @@ func (u AuthHandler) Login(ctx *gin.Context) {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body  body      dto.RegisterRequestDTO  true  "Register payload"
-// @Success      201   {object}  dto.Response{data=dto.RegisterResponseDTO}
+// @Param        body  body      dto.CreateUserDTO  true  "Register payload"
+// @Success      201   {object}  dto.Response{data=dto.CreateUserDTO}
 // @Failure      400   {object}  dto.Response
 // @Failure      409   {object}  dto.Response
 // @Failure      500   {object}  dto.Response
@@ -97,25 +97,9 @@ func (u AuthHandler) Register(ctx *gin.Context) {
 
 	result, err := u.authService.Register(newUser)
 	if err != nil {
-		msg := err.Error()
-		status := http.StatusInternalServerError
-
-		switch {
-		case strings.Contains(msg, "minimum") ||
-			strings.Contains(msg, "Invalid email") ||
-			strings.Contains(msg, "missmatch") ||
-			strings.Contains(msg, "invalid"):
-			status = http.StatusBadRequest
-
-		case strings.Contains(msg, "already used") ||
-			strings.Contains(msg, "already exists") ||
-			strings.Contains(msg, "duplicate"):
-			status = http.StatusConflict
-		}
-
-		ctx.JSON(status, dto.Response{
+		ctx.JSON(http.StatusBadRequest, dto.Response{
 			Success: false,
-			Message: msg,
+			Message: "Registration fail! " + err.Error(),
 			Data:    nil,
 		})
 		return
