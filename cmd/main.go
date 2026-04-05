@@ -30,6 +30,7 @@ func main() {
 	routers.NewUserCredentialRouters(router, container)
 	routers.NewRoleRouters(router, container)
 	routers.NewForgotPasswordRouters(router, container)
+	routers.NewProductRouter(router, container)
 
 	router.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
 }
