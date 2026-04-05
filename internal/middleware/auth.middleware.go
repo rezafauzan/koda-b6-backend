@@ -16,8 +16,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		if authHeader == "" {
 			ctx.JSON(http.StatusUnauthorized, dto.Response{
 				Success: false,
-				Messages: "Authorization header required",
-				Results: nil,
+				Message: "Authorization header required",
+				Data:    nil,
 			})
 			ctx.Abort()
 			return
@@ -26,8 +26,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		if !strings.HasPrefix(authHeader, "Bearer ") {
 			ctx.JSON(http.StatusUnauthorized, dto.Response{
 				Success: false,
-				Messages: "Invalid token format",
-				Results: nil,
+				Message: "Invalid token format",
+				Data:    nil,
 			})
 			ctx.Abort()
 			return
@@ -40,8 +40,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		if err != nil {
 			ctx.JSON(http.StatusUnauthorized, dto.Response{
 				Success: false,
-				Messages: "Invalid or expired token",
-				Results: nil,
+				Message: "Invalid or expired token",
+				Data:    nil,
 			})
 			ctx.Abort()
 			return
