@@ -20,52 +20,72 @@ func NewProductHandler(productService *services.ProductService) *ProductHandler 
 	}
 }
 
+// GetAllProducts godoc
+// @Summary      List products
+// @Description  Returns all products, optionally filtered by productName query parameter.
+// @Tags         products
+// @Produce      json
+// @Param        productName  query     string  false  "Filter by product name (partial match)"
+// @Success      200          {object}  dto.Response{data=[]dto.ProductResponseDTO}
+// @Failure      500          {object}  dto.Response
+// @Router       /products [get]
 func (p ProductHandler) GetAllProducts(ctx *gin.Context) {
 	productName := ctx.Query("productName")
 	if productName != "" {
 		products, err := p.productService.GetAllProductsByName(productName)
 		if err != nil {
-			ctx.JSON(http.StatusOK, dto.Response{
-				Success:  false,
-				Messages: "Failed to create response get all products! : " + err.Error(),
-				Results:  nil,
+			ctx.JSON(http.StatusInternalServerError, dto.Response{
+				Success: false,
+				Message: "Failed to create response get all products! : " + err.Error(),
+				Data:    nil,
 			})
 			return
 		}
 
 		ctx.JSON(http.StatusOK, dto.Response{
-			Success:  true,
-			Messages: "GET all products",
-			Results:  products,
+			Success: true,
+			Message: "GET all products",
+			Data:    products,
 		})
 		return
 	}
 	products, err := p.productService.GetAllProducts()
 	if err != nil {
-		ctx.JSON(http.StatusOK, dto.Response{
-			Success:  false,
-			Messages: "Failed to create response get all products! : " + err.Error(),
-			Results:  nil,
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
+			Success: false,
+			Message: "Failed to create response get all products! : " + err.Error(),
+			Data:    nil,
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, dto.Response{
-		Success:  true,
-		Messages: "GET all products",
-		Results:  products,
+		Success: true,
+		Message: "GET all products",
+		Data:    products,
 	})
 }
 
+// GetProductById godoc
+// @Summary      Get product by ID
+// @Description  Returns a single product by its numeric id.
+// @Tags         products
+// @Produce      json
+// @Param        productId  path      int  true  "Product ID"
+// @Success      200        {object}  dto.Response{data=dto.ProductResponseDTO}
+// @Failure      400        {object}  dto.Response
+// @Failure      404        {object}  dto.Response
+// @Failure      500        {object}  dto.Response
+// @Router       /products/{productId} [get]
 func (p ProductHandler) GetProductById(ctx *gin.Context) {
 	idParam := ctx.Param("productId")
 
 	productId, err := strconv.Atoi(idParam)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
-			Success:  false,
-			Messages: "Invalid product id",
-			Results:  nil,
+			Success: false,
+			Message: "Invalid product id",
+			Data:    nil,
 		})
 		return
 	}
@@ -74,24 +94,24 @@ func (p ProductHandler) GetProductById(ctx *gin.Context) {
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, dto.Response{
-				Success:  false,
-				Messages: "Product not found",
-				Results:  nil,
+				Success: false,
+				Message: "Product not found",
+				Data:    nil,
 			})
 			return
 		}
 
 		ctx.JSON(http.StatusInternalServerError, dto.Response{
-			Success:  false,
-			Messages: "Failed to get product! : " + err.Error(),
-			Results:  nil,
+			Success: false,
+			Message: "Failed to get product! : " + err.Error(),
+			Data:    nil,
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, dto.Response{
-		Success:  true,
-		Messages: "GET product by id",
-		Results:  product,
+		Success: true,
+		Message: "GET product by id",
+		Data:    product,
 	})
 }
