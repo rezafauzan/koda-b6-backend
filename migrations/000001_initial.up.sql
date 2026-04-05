@@ -38,11 +38,9 @@ CREATE TABLE IF NOT EXISTS roles(
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
     category_id INT NOT NULL,
-    favorite_product BOOLEAN NOT NULL DEFAULT FALSE,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     price INT NOT NULL,
-    campaign_id INT NOT NULL,
     stock INT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP

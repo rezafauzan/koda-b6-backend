@@ -1,0 +1,4 @@
+ALTER TABLE user_profiles DROP CONSTRAINT unique_userId_profiles;
+ALTER TABLE user_credentials DROP CONSTRAINT unique_userId_credentials;
+ALTER TABLE user_credentials DROP CONSTRAINT unique_email_credentials;
+ALTER TABLE user_credentials DROP CONSTRAINT unique_phone_credentials;
