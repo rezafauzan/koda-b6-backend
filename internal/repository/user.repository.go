@@ -101,7 +101,7 @@ func (u UserRepository) GetUserById(id int) (dto.UserResponseDTO, error) {
 		return dto.UserResponseDTO{}, err
 	}
 
-	user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[dto.UserResponseDTO])
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[dto.UserResponseDTO])
 	if err != nil {
 		return dto.UserResponseDTO{}, err
 	}
