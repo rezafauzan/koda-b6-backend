@@ -8,10 +8,10 @@ import (
 )
 
 func NewCartItemRouters(router *gin.Engine, container *di.Container) {
-	cartItemRoutes := router.Group("/cart-items")
+	cartItemRoutes := router.Group("/cart")
 	{
+		cartItemRoutes.GET("", middleware.AuthMiddleware(), container.CartItemHandler.GetCartItemsByCartId)
 		cartItemRoutes.POST("", middleware.AuthMiddleware(), container.CartItemHandler.AddItem)
 		cartItemRoutes.DELETE("/:id", middleware.AuthMiddleware(), container.CartItemHandler.DeleteItem)
-		cartItemRoutes.GET("", middleware.AuthMiddleware(), container.CartItemHandler.GetCartItemsByCartId)
 	}
 }
