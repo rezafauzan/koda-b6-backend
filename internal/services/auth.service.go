@@ -18,6 +18,7 @@ func NewAuthService(userCredentialsRepo *repository.UserCredentialRepository, us
 	return &AuthService{
 		userCredentialsRepo: userCredentialsRepo,
 		userRepo:            userRepo,
+		cartItemRepo:        cartItemRepo,
 	}
 }
 
