@@ -21,8 +21,8 @@ func NewProductRepository(db *pgxpool.Pool) (*ProductRepository, error) {
 }
 
 func (u ProductRepository) CreateProduct(newProduct *models.Product) (models.Product, error) {
-	sql := "INSERT INTO products (category_id, favorite_product, name, description, price, campaign_id, stock, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, category_id, favorite_product, name, description, price, campaign_id, stock, created_at, updated_at"
-	rows, err := u.db.Query(context.Background(), sql, newProduct.CategoryId, newProduct.FavoriteProduct, newProduct.Name, newProduct.Description, newProduct.Price, newProduct.CampaignId, newProduct.Stock, time.Now(), time.Now())
+	sql := "INSERT INTO products (category_id, favorite_product, name, description, price, stock, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, category_id, favorite_product, name, description, price, stock, created_at, updated_at"
+	rows, err := u.db.Query(context.Background(), sql, newProduct.CategoryId, newProduct.Name, newProduct.Description, newProduct.Price, newProduct.Stock, time.Now(), time.Now())
 	if err != nil {
 		return models.Product{}, errors.New("Failed to create new product! : " + err.Error())
 	}
@@ -36,13 +36,16 @@ func (u ProductRepository) CreateProduct(newProduct *models.Product) (models.Pro
 }
 
 func (u ProductRepository) GetAllProducts() ([]models.Product, error) {
-	sql := `SELECT id, category_id, favorite_product, name, description, price, campaign_id, stock, created_at, updated_at FROM products`
+	sql := `SELECT id, category_id, name, description, price, stock, created_at, updated_at FROM products`
+	
 	rows, err := u.db.Query(context.Background(), sql)
+
 	if err != nil {
 		return []models.Product{}, err
 	}
 
 	products, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Product])
+
 	if err != nil {
 		return []models.Product{}, errors.New("Failed to create response get all products! : " + err.Error())
 	}
@@ -50,16 +53,33 @@ func (u ProductRepository) GetAllProducts() ([]models.Product, error) {
 	return products, nil
 }
 
-func (u ProductRepository) GetProductById(id int) (models.Product, error) {
-	sql := `SELECT id, category_id, favorite_product, name, description, price, campaign_id, stock, created_at, updated_at FROM products WHERE id = $1`
-	rows, err := u.db.Query(context.Background(), sql, id)
+func (u ProductRepository) GetProductById(productId int) (models.Product, error) {
+	sql := `SELECT id, category_id, name, description, price, stock, created_at, updated_at FROM products WHERE id = $1`
+	rows, err := u.db.Query(context.Background(), sql, productId)
+
 	if err != nil {
 		return models.Product{}, err
 	}
 
-	product, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[models.Product])
+	product, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Product])
 	if err != nil {
 		return models.Product{}, err
+	}
+
+	return product, nil
+}
+
+func (u ProductRepository) GetAllProductsByName(productName string) ([]models.Product, error) {
+	sql := `SELECT id, category_id, name, description, price, stock, created_at, updated_at FROM products WHERE name ILIKE '%' || $1 || '%'`
+	rows, err := u.db.Query(context.Background(), sql, productName)
+
+	if err != nil {
+		return []models.Product{}, err
+	}
+
+	product, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Product])
+	if err != nil {
+		return []models.Product{}, err
 	}
 
 	return product, nil
@@ -81,7 +101,7 @@ func (u ProductRepository) UpdateProduct(newData models.Product) (models.Product
 
 	sql := `UPDATE products SET category_id = $1, favorite_product = $2, name = $3, description = $4, price = $5, campaign_id = $6, stock = $7, updated_at = $8 WHERE id = $9`
 
-	_, err = u.db.Exec(context.Background(), sql, newData.CategoryId, newData.FavoriteProduct, newData.Name, newData.Description, newData.Price, newData.CampaignId, newData.Stock, time.Now(), newData.Id)
+	_, err = u.db.Exec(context.Background(), sql, newData.CategoryId, newData.Name, newData.Description, newData.Price, newData.Stock, time.Now(), newData.Id)
 	if err != nil {
 		return models.Product{}, err
 	}
@@ -100,6 +120,5 @@ func (u ProductRepository) DeleteProduct(id int) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
