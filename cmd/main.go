@@ -9,8 +9,21 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "rezafauzan/koda-b6-golang/docs"
 )
 
+// @title                       CoffeeShop
+// @version                     1.0
+// @description                 CoffeShop Backend Restful API
+// @host                        localhost:8888
+// @BasePath                    /
+// @securityDefinitions.apikey  BearerAuth
+// @in                          header
+// @name                        Authorization
+// @description                 Type "Bearer" followed by a space and JWT value.
 func main() {
 	defer recover()
 	godotenv.Load()
@@ -31,6 +44,8 @@ func main() {
 	routers.NewRoleRouters(router, container)
 	routers.NewForgotPasswordRouters(router, container)
 	routers.NewProductRouter(router, container)
+
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
 }
