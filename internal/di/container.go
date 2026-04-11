@@ -7,10 +7,12 @@ import (
 	"rezafauzan/koda-b6-golang/internal/services"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type Container struct {
 	db                    *pgxpool.Pool
+	rdb                   *redis.Client
 	UserHandler           *handlers.UserHandler
 	UserProfileHandler    *handlers.UserProfileHandler
 	UserCredentialHandler *handlers.UserCredentialHandler
@@ -26,9 +28,13 @@ func NewContainer() (*Container, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	rdb := lib.InitRedis()
 	container := &Container{
-		db: db,
+		db:  db,
+		rdb: rdb,
 	}
+
 	container.initDependencies()
 	return container, nil
 }
@@ -50,7 +56,7 @@ func (c *Container) initDependencies() {
 	roleService := services.NewRoleService(roleRepo)
 	c.RoleHandler = handlers.NewRoleHandler(roleService)
 
-	productRepo, _ := repository.NewProductRepository(c.db)
+	productRepo, _ := repository.NewProductRepository(c.db, c.rdb)
 	productService := services.NewProductService(productRepo)
 	c.ProductHandler = handlers.NewProductHandler(productService)
 
