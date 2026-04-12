@@ -8,21 +8,24 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type ProductRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	rdb *redis.Client
 }
 
-func NewProductRepository(db *pgxpool.Pool) (*ProductRepository, error) {
+func NewProductRepository(db *pgxpool.Pool, rdb *redis.Client) (*ProductRepository, error) {
 	return &ProductRepository{
-		db: db,
+		db:  db,
+		rdb: rdb,
 	}, nil
 }
 
-func (u ProductRepository) CreateProduct(newProduct *models.Product) (models.Product, error) {
+func (p ProductRepository) CreateProduct(newProduct *models.Product) (models.Product, error) {
 	sql := "INSERT INTO products (category_id, favorite_product, name, description, price, stock, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, category_id, favorite_product, name, description, price, stock, created_at, updated_at"
-	rows, err := u.db.Query(context.Background(), sql, newProduct.CategoryId, newProduct.Name, newProduct.Description, newProduct.Price, newProduct.Stock, time.Now(), time.Now())
+	rows, err := p.db.Query(context.Background(), sql, newProduct.CategoryId, newProduct.Name, newProduct.Description, newProduct.Price, newProduct.Stock, time.Now(), time.Now())
 	if err != nil {
 		return models.Product{}, errors.New("Failed to create new product! : " + err.Error())
 	}
@@ -35,10 +38,10 @@ func (u ProductRepository) CreateProduct(newProduct *models.Product) (models.Pro
 	return registeredProduct, nil
 }
 
-func (u ProductRepository) GetAllProducts() ([]models.Product, error) {
+func (p ProductRepository) GetAllProducts() ([]models.Product, error) {
 	sql := `SELECT id, category_id, name, description, price, stock, created_at, updated_at FROM products`
-	
-	rows, err := u.db.Query(context.Background(), sql)
+
+	rows, err := p.db.Query(context.Background(), sql)
 
 	if err != nil {
 		return []models.Product{}, err
@@ -50,12 +53,20 @@ func (u ProductRepository) GetAllProducts() ([]models.Product, error) {
 		return []models.Product{}, errors.New("Failed to create response get all products! : " + err.Error())
 	}
 
+	if p.rdb != nil {
+		cacheKey := "products"
+		err := p.rdb.Del(context.Background(), cacheKey).Err()
+		if err != nil {
+			return []models.Product{}, errors.New("Redis Error : " + err.Error())
+		}
+	}
+
 	return products, nil
 }
 
-func (u ProductRepository) GetProductById(productId int) (models.Product, error) {
+func (p ProductRepository) GetProductById(productId int) (models.Product, error) {
 	sql := `SELECT id, category_id, name, description, price, stock, created_at, updated_at FROM products WHERE id = $1`
-	rows, err := u.db.Query(context.Background(), sql, productId)
+	rows, err := p.db.Query(context.Background(), sql, productId)
 
 	if err != nil {
 		return models.Product{}, err
@@ -69,9 +80,9 @@ func (u ProductRepository) GetProductById(productId int) (models.Product, error)
 	return product, nil
 }
 
-func (u ProductRepository) GetAllProductsByName(productName string) ([]models.Product, error) {
+func (p ProductRepository) GetAllProductsByName(productName string) ([]models.Product, error) {
 	sql := `SELECT id, category_id, name, description, price, stock, created_at, updated_at FROM products WHERE name ILIKE '%' || $1 || '%'`
-	rows, err := u.db.Query(context.Background(), sql, productName)
+	rows, err := p.db.Query(context.Background(), sql, productName)
 
 	if err != nil {
 		return []models.Product{}, err
@@ -85,8 +96,8 @@ func (u ProductRepository) GetAllProductsByName(productName string) ([]models.Pr
 	return product, nil
 }
 
-func (u ProductRepository) UpdateProduct(newData models.Product) (models.Product, error) {
-	product, err := u.GetProductById(newData.Id)
+func (p ProductRepository) UpdateProduct(newData models.Product) (models.Product, error) {
+	product, err := p.GetProductById(newData.Id)
 	if err != nil {
 		return models.Product{}, err
 	}
@@ -101,12 +112,12 @@ func (u ProductRepository) UpdateProduct(newData models.Product) (models.Product
 
 	sql := `UPDATE products SET category_id = $1, favorite_product = $2, name = $3, description = $4, price = $5, campaign_id = $6, stock = $7, updated_at = $8 WHERE id = $9`
 
-	_, err = u.db.Exec(context.Background(), sql, newData.CategoryId, newData.Name, newData.Description, newData.Price, newData.Stock, time.Now(), newData.Id)
+	_, err = p.db.Exec(context.Background(), sql, newData.CategoryId, newData.Name, newData.Description, newData.Price, newData.Stock, time.Now(), newData.Id)
 	if err != nil {
 		return models.Product{}, err
 	}
 
-	updatedProduct, err := u.GetProductById(newData.Id)
+	updatedProduct, err := p.GetProductById(newData.Id)
 	if err != nil {
 		return models.Product{}, err
 	}
@@ -114,9 +125,9 @@ func (u ProductRepository) UpdateProduct(newData models.Product) (models.Product
 	return updatedProduct, nil
 }
 
-func (u ProductRepository) DeleteProduct(id int) error {
+func (p ProductRepository) DeleteProduct(id int) error {
 	sql := `DELETE FROM products WHERE id = $1`
-	_, err := u.db.Exec(context.Background(), sql, id)
+	_, err := p.db.Exec(context.Background(), sql, id)
 	if err != nil {
 		return err
 	}
