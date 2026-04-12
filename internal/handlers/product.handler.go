@@ -20,6 +20,47 @@ func NewProductHandler(productService *services.ProductService) *ProductHandler 
 	}
 }
 
+// CreateNewProduct godoc
+// @Summary      Create new product
+// @Description  Create a new product and store it in database
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.CreateProductRequestDTO  true  "Create Product Request"
+// @Success      201      {object}  dto.Response{data=dto.ProductResponseDTO}
+// @Failure      400      {object}  dto.Response
+// @Failure      500      {object}  dto.Response
+// @Router       /products [post]
+func (p ProductHandler) CreateNewProduct(ctx *gin.Context) {
+	var newProduct dto.CreateProductRequestDTO
+
+	err := ctx.ShouldBindJSON(&newProduct)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "Invalid request body: " + err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+	
+	result, err := p.productService.CreateNewProduct(newProduct)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
+			Success: false,
+			Message: "Failed to create product: " + err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, dto.Response{
+		Success: true,
+		Message: "Product created successfully",
+		Data:    result,
+	})
+}
+
 // GetAllProducts godoc
 // @Summary      List products
 // @Description  Returns all products, optionally filtered by productName query parameter.
