@@ -12,5 +12,6 @@ func NewProductRouter(router *gin.Engine, container *di.Container){
 		productRoutes.POST("", container.ProductHandler.CreateNewProduct)
 		productRoutes.GET("", container.ProductHandler.GetAllProducts)
 		productRoutes.GET("/:productId", container.ProductHandler.GetProductById)
+		productRoutes.PATCH("/:productId", container.ProductHandler.UpdateProduct)
 	}
 }
