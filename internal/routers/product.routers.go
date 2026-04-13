@@ -9,6 +9,7 @@ import (
 func NewProductRouter(router *gin.Engine, container *di.Container){
 	productRoutes := router.Group("/products")
 	{
+		productRoutes.POST("", container.ProductHandler.CreateNewProduct)
 		productRoutes.GET("", container.ProductHandler.GetAllProducts)
 		productRoutes.GET("/:productId", container.ProductHandler.GetProductById)
 	}
