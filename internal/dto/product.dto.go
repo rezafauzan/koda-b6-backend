@@ -7,7 +7,7 @@ type ProductResponseDTO struct {
 	CategoryId  int       `json:"category_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	Price       float64       `json:"price"`
+	Price       float64   `json:"price"`
 	Stock       int       `json:"stock"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
@@ -19,4 +19,13 @@ type CreateProductRequestDTO struct {
 	Description string  `json:"description" binding:"required"`
 	Price       float64 `json:"price" binding:"required,gt=0"`
 	Stock       int     `json:"stock" binding:"gte=0"`
+}
+
+type UpdateProductRequestDTO struct {
+	Id          int     `json:"id"`
+	CategoryId  int     `json:"category_id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+	Stock       int     `json:"stock"`
 }
