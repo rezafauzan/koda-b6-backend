@@ -43,7 +43,7 @@ func (p ProductHandler) CreateNewProduct(ctx *gin.Context) {
 		})
 		return
 	}
-	
+
 	result, err := p.productService.CreateNewProduct(newProduct)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.Response{
@@ -154,5 +154,47 @@ func (p ProductHandler) GetProductById(ctx *gin.Context) {
 		Success: true,
 		Message: "GET product by id",
 		Data:    product,
+	})
+}
+
+func (p ProductHandler) UpdateProduct(ctx *gin.Context) {
+	var req dto.UpdateProductRequestDTO
+
+	err := ctx.ShouldBindJSON(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "Invalid request body: " + err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	id, err := strconv.Atoi(ctx.Param("productId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "Invalid product id",
+			Data:    nil,
+		})
+		return
+	}
+
+	req.Id = id
+
+	result, err := p.productService.UpdateProduct(req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
+			Success: false,
+			Message: "Failed to update product: " + err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.Response{
+		Success: true,
+		Message: "Product updated successfully",
+		Data:    result,
 	})
 }
