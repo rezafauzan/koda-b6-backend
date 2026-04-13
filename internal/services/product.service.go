@@ -139,3 +139,38 @@ func (p ProductService) GetProductById(productId int) (dto.ProductResponseDTO, e
 
 	return result, nil
 }
+
+func (p ProductService) UpdateProduct(req dto.UpdateProductRequestDTO) (dto.ProductResponseDTO, error) {
+	if req.Id <= 0 {
+		return dto.ProductResponseDTO{}, errors.New("id is required")
+	}
+
+	if strings.TrimSpace(req.Name) == "" && strings.TrimSpace(req.Description) == "" && req.Price == 0 && req.Stock == 0 && req.CategoryId == 0 {
+		return dto.ProductResponseDTO{}, errors.New("no data to update")
+	}
+
+	product, err := p.productRepository.UpdateProduct(models.Product{
+		Id:          req.Id,
+		CategoryId:  req.CategoryId,
+		Name:        req.Name,
+		Description: req.Description,
+		Price:       req.Price,
+		Stock:       req.Stock,
+	})
+	if err != nil {
+		return dto.ProductResponseDTO{}, err
+	}
+
+	response := dto.ProductResponseDTO{
+		Id:          product.Id,
+		CategoryId:  product.CategoryId,
+		Name:        product.Name,
+		Description: product.Description,
+		Price:       product.Price,
+		Stock:       product.Stock,
+		CreatedAt:   product.CreatedAt,
+		UpdatedAt:   product.UpdatedAt,
+	}
+
+	return response, nil
+}
