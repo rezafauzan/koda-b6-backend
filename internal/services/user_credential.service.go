@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"rezafauzan/koda-b6-golang/internal/dto"
+	"rezafauzan/koda-b6-golang/internal/lib"
 	"rezafauzan/koda-b6-golang/internal/models"
 	"rezafauzan/koda-b6-golang/internal/repository"
 	"strings"
@@ -34,8 +35,8 @@ func (u UserCredentialService) GetUserCredentialByUserId(userId int) (dto.UserCr
 	return response, nil
 }
 
-func (u UserCredentialService) UpdateUserCredential(newData dto.UpdateUserCredentialDTO) (dto.UserCredentialResponseDTO, error) {
-	userCredentials, err := u.userCredentialRepo.GetUserCredentialsByEmail(newData.Email)
+func (u UserCredentialService) UpdateUserCredential(userId int, newData dto.UpdateUserCredentialDTO) (dto.UserCredentialResponseDTO, error) {
+	userCredentials, err := u.userCredentialRepo.GetUserCredentialByUserId(userId)
 	if err != nil {
 		return dto.UserCredentialResponseDTO{}, err
 	}
@@ -55,6 +56,11 @@ func (u UserCredentialService) UpdateUserCredential(newData dto.UpdateUserCreden
 		if newData.Password != "" && newData.ConfirmPassword != newData.Password {
 			return dto.UserCredentialResponseDTO{}, errors.New("Confirm password not matched")
 		}
+		hashedPassword, err := lib.HashPassword(newData.Password)
+		if err != nil {
+			return dto.UserCredentialResponseDTO{}, errors.New("failed to hash password")
+		}
+		newData.Password = hashedPassword
 	}
 
 	if !strings.Contains(newData.Email, "@") {
@@ -66,7 +72,7 @@ func (u UserCredentialService) UpdateUserCredential(newData dto.UpdateUserCreden
 
 	modeledData := models.UserCredential{
 		Id:       userCredentials.Id,
-		UserId:   userCredentials.UserId,
+		UserId:   userId,
 		Email:    newData.Email,
 		Phone:    newData.Phone,
 		Password: newData.Password,
