@@ -2,16 +2,17 @@ package routers
 
 import (
 	"rezafauzan/koda-b6-golang/internal/di"
+	"rezafauzan/koda-b6-golang/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func NewUserRouters(router *gin.Engine, container *di.Container) {
-	userRoutes := router.Group("/users")
+	userRoutes := router.Group("/admin/users")
 	{
-		userRoutes.GET("", container.UserHandler.GetAllUsers)
-		userRoutes.POST("", container.UserHandler.CreateNewUser)
-		userRoutes.PATCH("", container.UserHandler.UpdateUserProfiles)
-		userRoutes.DELETE(":id", container.UserHandler.DeleteUser)
+		userRoutes.GET("", middleware.AuthMiddleware(), middleware.RBAC("admin"), container.UserHandler.GetAllUsers)
+		userRoutes.POST("", middleware.AuthMiddleware(), middleware.RBAC("admin"), container.UserHandler.CreateNewUser)
+		userRoutes.PATCH("/:id", middleware.AuthMiddleware(), middleware.RBAC("admin"), container.UserHandler.UpdateUserProfiles)
+		userRoutes.DELETE("/:id", middleware.AuthMiddleware(), middleware.RBAC("admin"), container.UserHandler.DeleteUser)
 	}
 }
