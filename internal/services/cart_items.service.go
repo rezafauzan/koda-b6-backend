@@ -20,16 +20,12 @@ func (s *CartItemService) AddItem(newCartItemData dto.CreateCartItemRequestDTO) 
 		return models.CartItem{}, errors.New("Failed to add item! : Product ID is required !")
 	}
 
-	if len(newCartItemData.Size) == 0 {
+	if newCartItemData.SizeId <= 0 {
 		return models.CartItem{}, errors.New("Failed to add item! : Size is required !")
 	}
 
-	if len(newCartItemData.Hotice) == 0 {
-		return models.CartItem{}, errors.New("Failed to add item! : Hot/Ice must be filled !")
-	}
-
-	if newCartItemData.Hotice != "hot" && newCartItemData.Hotice != "ice" {
-		return models.CartItem{}, errors.New("Failed to add item! : Hotice must be either 'hot' or 'ice' !")
+	if newCartItemData.VariantId <= 0 {
+		return models.CartItem{}, errors.New("Failed to add item! : Variant is required !")
 	}
 
 	if newCartItemData.Quantity <= 0 {
@@ -45,8 +41,8 @@ func (s *CartItemService) AddItem(newCartItemData dto.CreateCartItemRequestDTO) 
 		Id:        result.Id,
 		CartId:    result.CartId,
 		ProductId: result.ProductId,
-		Size:      result.Size,
-		Hotice:    result.Hotice,
+		SizeId:    result.SizeId,
+		VariantId: result.VariantId,
 		Quantity:  result.Quantity,
 		CreatedAt: result.CreatedAt,
 		UpdatedAt: result.UpdatedAt,
@@ -64,8 +60,8 @@ func (s *CartItemService) GetCartItemsByCartId(cartId int) ([]models.CartItem, e
 	return result, nil
 }
 
-func (s *CartItemService) DeleteItem(id int) (models.CartItem, error) {
-	result, err := s.repo.DeleteItem(id)
+func (s *CartItemService) DeleteItem(id int, cartId int) (models.CartItem, error) {
+	result, err := s.repo.DeleteItem(id, cartId)
 	if err != nil {
 		return models.CartItem{}, err
 	}
