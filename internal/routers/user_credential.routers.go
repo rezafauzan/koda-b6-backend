@@ -13,7 +13,7 @@ type UserCredentialRouter struct {
 }
 
 func NewUserCredentialRouters(router *gin.Engine, container *di.Container) {
-	userCredentialRoutes := router.Group("/user-credentials")
+	userCredentialRoutes := router.Group("/credentials")
 	{
 		userCredentialRoutes.GET("", middleware.AuthMiddleware(), container.UserCredentialHandler.GetUserCredentialsByUserId)
 		userCredentialRoutes.PATCH("", middleware.AuthMiddleware(), container.UserCredentialHandler.UpdateUserCredential)
