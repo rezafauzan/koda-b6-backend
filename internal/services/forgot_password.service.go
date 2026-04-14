@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"rezafauzan/koda-b6-golang/internal/dto"
+	"rezafauzan/koda-b6-golang/internal/lib"
 	"rezafauzan/koda-b6-golang/internal/models"
 	"rezafauzan/koda-b6-golang/internal/repository"
 	"strconv"
@@ -31,10 +32,10 @@ func (f ForgotPasswordService) RequestForgotPassword(email string) (models.Forgo
 
 	user, userExists, err := f.userRepo.GetUserByEmail(email)
 	if err != nil {
-		return models.ForgotPassword{}, errors.New("Failed to request forgot password! : Email not found !")
+		return models.ForgotPassword{}, nil
 	}
 	if !userExists {
-		return models.ForgotPassword{}, errors.New("Failed to request forgot password! : Email not found !")
+		return models.ForgotPassword{}, nil
 	}
 
 	codeOTP, err := rand.Int(rand.Reader, big.NewInt(900000))
@@ -90,7 +91,12 @@ func (f ForgotPasswordService) ResetPassword(req dto.ResetForgotPasswordDTO) err
 		return errors.New("Failed to reset password! : OTP is invalid !")
 	}
 
-	err = f.userRepo.UpdatePassword(req.Email, req.New_password)
+	hashedPassword, err := lib.HashPassword(req.New_password)
+	if err != nil {
+		return errors.New("Failed to reset password! : failed to hash password")
+	}
+
+	err = f.userRepo.UpdatePassword(req.Email, hashedPassword)
 	if err != nil {
 		return errors.New("Failed to reset password! : " + err.Error())
 	}
