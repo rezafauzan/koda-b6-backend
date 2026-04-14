@@ -76,6 +76,16 @@ func (u UserCredentialHandler) GetUserCredentialsByUserId(ctx *gin.Context) {
 // @Failure      500   {object}  dto.Response
 // @Router       /user-credentials [patch]
 func (u UserCredentialHandler) UpdateUserCredential(ctx *gin.Context) {
+	userId, exist := ctx.Get("user_id")
+	if !exist {
+		ctx.JSON(http.StatusUnauthorized, dto.Response{
+			Success: false,
+			Message: "Invalid or expired token",
+			Data:    nil,
+		})
+		return
+	}
+
 	var body dto.UpdateUserCredentialDTO
 	err := ctx.ShouldBindJSON(&body)
 	if err != nil {
@@ -86,7 +96,7 @@ func (u UserCredentialHandler) UpdateUserCredential(ctx *gin.Context) {
 		})
 		return
 	}
-	updated, err := u.userCredentialService.UpdateUserCredential(body)
+	updated, err := u.userCredentialService.UpdateUserCredential(userId.(int), body)
 	if err != nil {
 		msg := err.Error()
 		status := http.StatusInternalServerError
