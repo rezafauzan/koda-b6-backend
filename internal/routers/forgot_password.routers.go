@@ -14,7 +14,7 @@ type ForgotPasswordRouter struct {
 func NewForgotPasswordRouters(router *gin.Engine, container *di.Container) {
 	forgotPasswordRoutes := router.Group("/forgot-password")
 	{
-		forgotPasswordRoutes.POST("request", container.ForgotPasswordHandler.RequestForgotPassword)
-		forgotPasswordRoutes.POST("reset", container.ForgotPasswordHandler.ResetPassword)
+		forgotPasswordRoutes.POST("/request", container.ForgotPasswordHandler.RequestForgotPassword)
+		forgotPasswordRoutes.POST("/reset", container.ForgotPasswordHandler.ResetPassword)
 	}
 }
