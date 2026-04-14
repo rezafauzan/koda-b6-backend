@@ -6,6 +6,8 @@ import (
 	"rezafauzan/koda-b6-golang/internal/lib"
 	"rezafauzan/koda-b6-golang/internal/repository"
 	"strings"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type AuthService struct {
@@ -29,7 +31,10 @@ func (a AuthService) Login(req dto.LoginRequestDTO) (dto.LoginResponseDTO, error
 
 	userCredentials, err := a.userCredentialsRepo.GetUserCredentialsByEmail(req.Email)
 	if err != nil {
-		return dto.LoginResponseDTO{}, errors.New("Failed to get user credentials by email : " + err.Error())
+		if errors.Is(err, pgx.ErrNoRows) {
+			return dto.LoginResponseDTO{}, errors.New("Invalid email or password !")
+		}
+		return dto.LoginResponseDTO{}, errors.New("failed to get user credentials by email: " + err.Error())
 	}
 
 	if req.Password != userCredentials.Password {
