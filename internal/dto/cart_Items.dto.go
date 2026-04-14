@@ -2,7 +2,7 @@ package dto
 type CreateCartItemRequestDTO struct {
 	CartId    int    `json:"cart_id"`
 	ProductId int    `json:"product_id"`
-	Size      string `json:"size"`
-	Hotice    string `json:"hotice"`
+	SizeId    int    `json:"size_id"`
+	VariantId int    `json:"variant_id"`
 	Quantity  int    `json:"quantity"`
 }
