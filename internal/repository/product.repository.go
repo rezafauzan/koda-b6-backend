@@ -129,6 +129,21 @@ func (p ProductRepository) GetAllProductsByName(productName string) ([]models.Pr
 	return product, nil
 }
 
+func (p ProductRepository) GetProductsByCategoryId(categoryId int) ([]models.Product, error) {
+	sql := `SELECT id, category_id, name, description, price, stock, created_at, updated_at FROM products WHERE category_id = $1`
+	rows, err := p.db.Query(context.Background(), sql, categoryId)
+	if err != nil {
+		return []models.Product{}, err
+	}
+
+	products, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Product])
+	if err != nil {
+		return []models.Product{}, err
+	}
+
+	return products, nil
+}
+
 func (p ProductRepository) UpdateProduct(newData models.Product) (models.Product, error) {
 	product, err := p.GetProductById(newData.Id)
 	if err != nil {
@@ -178,11 +193,16 @@ func (p ProductRepository) UpdateProduct(newData models.Product) (models.Product
 	return updatedProduct, nil
 }
 
-func (p ProductRepository) DeleteProduct(id int) error {
-	sql := `DELETE FROM products WHERE id = $1`
-	_, err := p.db.Exec(context.Background(), sql, id)
+func (p ProductRepository) DeleteProduct(id int) (models.Product, error) {
+	product, err := p.GetProductById(id)
 	if err != nil {
-		return err
+		return models.Product{}, err
 	}
-	return nil
+
+	sql := `DELETE FROM products WHERE id = $1`
+	_, err = p.db.Exec(context.Background(), sql, id)
+	if err != nil {
+		return models.Product{}, err
+	}
+	return product, nil
 }
