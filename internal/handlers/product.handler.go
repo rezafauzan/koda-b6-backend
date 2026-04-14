@@ -71,7 +71,7 @@ func (p ProductHandler) CreateNewProduct(ctx *gin.Context) {
 // @Failure      500          {object}  dto.Response
 // @Router       /products [get]
 func (p ProductHandler) GetAllProducts(ctx *gin.Context) {
-	productName := ctx.Query("productName")
+	productName := ctx.Query("name")
 	if productName != "" {
 		products, err := p.productService.GetAllProductsByName(productName)
 		if err != nil {
@@ -105,6 +105,22 @@ func (p ProductHandler) GetAllProducts(ctx *gin.Context) {
 		Message: "GET all products",
 		Data:    products,
 	})
+}
+
+func (p ProductHandler) GetProductByCategoryId(ctx *gin.Context) {
+	categoryID, err := strconv.Atoi(ctx.Param("category_id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{Success: false, Message: "category_id is required", Data: nil})
+		return
+	}
+
+	products, err := p.productService.GetProductsByCategoryId(categoryID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.Response{Success: false, Message: "Get products by category failed: " + err.Error(), Data: nil})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.Response{Success: true, Message: "Get products by category success", Data: products})
 }
 
 // GetProductById godoc
@@ -197,4 +213,24 @@ func (p ProductHandler) UpdateProduct(ctx *gin.Context) {
 		Message: "Product updated successfully",
 		Data:    result,
 	})
+}
+
+func (p ProductHandler) DeleteProduct(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("productId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{Success: false, Message: "id is required", Data: nil})
+		return
+	}
+
+	deleted, err := p.productService.DeleteProduct(id)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, dto.Response{Success: false, Message: "Product not found", Data: nil})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, dto.Response{Success: false, Message: "Delete product failed: " + err.Error(), Data: nil})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.Response{Success: true, Message: "Delete product success", Data: deleted})
 }
