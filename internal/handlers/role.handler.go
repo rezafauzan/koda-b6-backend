@@ -118,6 +118,16 @@ func (u RoleHandler) UpdateRole(ctx *gin.Context) {
 		})
 		return
 	}
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "id is required",
+			Data:    nil,
+		})
+		return
+	}
+	newRole.Id = id
 	updatedRole, err := u.roleService.UpdateRole(newRole)
 	if err != nil {
 		msg := err.Error()
@@ -163,7 +173,7 @@ func (u RoleHandler) DeleteRole(ctx *gin.Context) {
 		})
 		return
 	}
-	_, err = u.roleService.DeleteRole(id)
+	deleted, err := u.roleService.DeleteRole(id)
 	if err != nil {
 		msg := err.Error()
 		status := http.StatusInternalServerError
@@ -177,5 +187,42 @@ func (u RoleHandler) DeleteRole(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.Status(http.StatusNoContent)
+	ctx.JSON(http.StatusOK, dto.Response{
+		Success: true,
+		Message: "Role deleted successfully",
+		Data:    deleted,
+	})
+}
+
+func (u RoleHandler) GetRoleByName(ctx *gin.Context) {
+	name := ctx.Param("name")
+	if strings.TrimSpace(name) == "" {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "role name is required",
+			Data:    nil,
+		})
+		return
+	}
+
+	role, err := u.roleService.GetRoleByName(name)
+	if err != nil {
+		msg := err.Error()
+		status := http.StatusInternalServerError
+		if strings.Contains(strings.ToLower(msg), "not found") {
+			status = http.StatusNotFound
+		}
+		ctx.JSON(status, dto.Response{
+			Success: false,
+			Message: msg,
+			Data:    nil,
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.Response{
+		Success: true,
+		Message: "Success get role",
+		Data:    role,
+	})
 }
