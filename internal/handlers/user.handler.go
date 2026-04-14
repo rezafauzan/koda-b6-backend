@@ -118,6 +118,17 @@ func (u UserHandler) UpdateUserProfiles(ctx *gin.Context) {
 		})
 		return
 	}
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "Invalid user id !",
+			Data:    nil,
+		})
+		return
+	}
+	newUser.Id = id
+
 	updatedUser, err := u.userService.UpdateUserProfiles(newUser)
 	if err != nil {
 		msg := err.Error()
@@ -163,7 +174,7 @@ func (u UserHandler) DeleteUser(ctx *gin.Context) {
 		})
 		return
 	}
-	_, err = u.userService.DeleteUser(id)
+	deleted, err := u.userService.DeleteUser(id)
 	if err != nil {
 		msg := err.Error()
 		status := http.StatusInternalServerError
@@ -177,5 +188,9 @@ func (u UserHandler) DeleteUser(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.Status(http.StatusNoContent)
+	ctx.JSON(http.StatusOK, dto.Response{
+		Success: true,
+		Message: "Delete user success!",
+		Data:    deleted,
+	})
 }
