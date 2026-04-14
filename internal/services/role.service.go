@@ -55,6 +55,14 @@ func (u RoleService) GetRoleById(id int) (dto.RoleResponseDTO, error) {
 	return response, nil
 }
 
+func (u RoleService) GetRoleByName(name string) (dto.RoleResponseDTO, error) {
+	role, err := u.roleRepo.GetRoleByName(name)
+	if err != nil {
+		return dto.RoleResponseDTO{}, errors.New("Role not found")
+	}
+	return dto.RoleResponseDTO{Id: role.Id, Role_name: role.RoleName, Created_at: role.CreatedAt, Updated_at: role.UpdatedAt}, nil
+}
+
 func (u RoleService) UpdateRole(newRole dto.UpdateRoleDTO) (dto.RoleResponseDTO, error) {
 	if newRole.Role_name != "" && len(newRole.Role_name) < 4 {
 		return dto.RoleResponseDTO{}, errors.New("Role name minimum 4 characters")
