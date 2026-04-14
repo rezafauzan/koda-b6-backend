@@ -120,6 +120,28 @@ func (p ProductService) GetAllProductsByName(productName string) ([]dto.ProductR
 	return response, nil
 }
 
+func (p ProductService) GetProductsByCategoryId(categoryId int) ([]dto.ProductResponseDTO, error) {
+	products, err := p.productRepository.GetProductsByCategoryId(categoryId)
+	if err != nil {
+		return []dto.ProductResponseDTO{}, err
+	}
+
+	var response []dto.ProductResponseDTO
+	for _, product := range products {
+		response = append(response, dto.ProductResponseDTO{
+			Id:          product.Id,
+			CategoryId:  product.CategoryId,
+			Name:        product.Name,
+			Description: product.Description,
+			Price:       product.Price,
+			Stock:       product.Stock,
+			CreatedAt:   product.CreatedAt,
+			UpdatedAt:   product.UpdatedAt,
+		})
+	}
+	return response, nil
+}
+
 func (p ProductService) GetProductById(productId int) (dto.ProductResponseDTO, error) {
 	product, err := p.productRepository.GetProductById(productId)
 	if err != nil {
@@ -173,4 +195,26 @@ func (p ProductService) UpdateProduct(req dto.UpdateProductRequestDTO) (dto.Prod
 	}
 
 	return response, nil
+}
+
+func (p ProductService) DeleteProduct(id int) (dto.ProductResponseDTO, error) {
+	if id <= 0 {
+		return dto.ProductResponseDTO{}, errors.New("id is required")
+	}
+
+	deleted, err := p.productRepository.DeleteProduct(id)
+	if err != nil {
+		return dto.ProductResponseDTO{}, err
+	}
+
+	return dto.ProductResponseDTO{
+		Id:          deleted.Id,
+		CategoryId:  deleted.CategoryId,
+		Name:        deleted.Name,
+		Description: deleted.Description,
+		Price:       deleted.Price,
+		Stock:       deleted.Stock,
+		CreatedAt:   deleted.CreatedAt,
+		UpdatedAt:   deleted.UpdatedAt,
+	}, nil
 }
