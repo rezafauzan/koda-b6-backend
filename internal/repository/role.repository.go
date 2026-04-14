@@ -65,6 +65,21 @@ func (u RoleRepository) GetRoleById(id int) (models.Role, error) {
 	return role, nil
 }
 
+func (u RoleRepository) GetRoleByName(name string) (models.Role, error) {
+	sql := `SELECT id, role_name, created_at, updated_at FROM roles WHERE role_name = $1`
+	rows, err := u.db.Query(context.Background(), sql, name)
+	if err != nil {
+		return models.Role{}, err
+	}
+
+	role, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[models.Role])
+	if err != nil {
+		return models.Role{}, err
+	}
+
+	return role, nil
+}
+
 func (u RoleRepository) UpdateRole(newData models.Role) (models.Role, error) {
 	role, err := u.GetRoleById(newData.Id)
 	if err != nil {
