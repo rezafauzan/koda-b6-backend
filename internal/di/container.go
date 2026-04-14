@@ -21,6 +21,8 @@ type Container struct {
 	ProductHandler        *handlers.ProductHandler
 	CartItemHandler       *handlers.CartItemHandler
 	ForgotPasswordHandler *handlers.ForgotPasswordHandler
+	OrderHandler          *handlers.OrderHandler
+	ProductReviewHandler  *handlers.ProductReviewHandler
 }
 
 func NewContainer() (*Container, error) {
@@ -70,4 +72,12 @@ func (c *Container) initDependencies() {
 	forgotPasswordRepo, _ := repository.NewForgotPasswordRepository(c.db)
 	forgotPasswordService := services.NewForgotPasswordService(forgotPasswordRepo, userRepo)
 	c.ForgotPasswordHandler = handlers.NewForgotPasswordHandler(forgotPasswordService)
+
+	orderRepo := repository.NewOrderRepository(c.db)
+	orderService := services.NewOrderService(orderRepo)
+	c.OrderHandler = handlers.NewOrderHandler(orderService)
+
+	productReviewRepo := repository.NewProductReviewRepository(c.db)
+	productReviewService := services.NewProductReviewService(productReviewRepo)
+	c.ProductReviewHandler = handlers.NewProductReviewHandler(productReviewService)
 }
