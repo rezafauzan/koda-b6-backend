@@ -9,15 +9,17 @@ import (
 )
 
 type CustomClaims struct {
-	UserId int    `json:"user_id"`
-	CartId int    `json:"cart_id"`
+	Id       int    `json:"id"`
+	CartId   int    `json:"cart_id"`
+	RoleName string `json:"role_name"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(userId int, cartId int) (string, error) {
+func GenerateToken(id int, cartId int, roleName string) (string, error) {
 	claims := CustomClaims{
-		UserId: userId,
-		CartId: cartId,
+		Id:       id,
+		CartId:   cartId,
+		RoleName: roleName,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
