@@ -119,6 +119,16 @@ func (c CartItemHandler) GetCartItemsByCartId(ctx *gin.Context) {
 // @Failure      500  {object}  dto.Response
 // @Router       /cart-items/{id} [delete]
 func (c CartItemHandler) DeleteItem(ctx *gin.Context) {
+	cartId, exist := ctx.Get("cart_id")
+	if !exist {
+		ctx.JSON(http.StatusUnauthorized, dto.Response{
+			Success: false,
+			Message: "Invalid session, please relogin!",
+			Data:    nil,
+		})
+		return
+	}
+
 	idParam := ctx.Param("id")
 
 	id, err := strconv.Atoi(idParam)
@@ -131,7 +141,7 @@ func (c CartItemHandler) DeleteItem(ctx *gin.Context) {
 		return
 	}
 
-	result, err := c.cartItemService.DeleteItem(id)
+	result, err := c.cartItemService.DeleteItem(id, cartId.(int))
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, dto.Response{
