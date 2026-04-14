@@ -37,18 +37,17 @@ func (a AuthService) Login(req dto.LoginRequestDTO) (dto.LoginResponseDTO, error
 		return dto.LoginResponseDTO{}, errors.New("failed to get user credentials by email: " + err.Error())
 	}
 
-	if req.Password != userCredentials.Password {
+	isValid := lib.VerifyPassword(req.Password, userCredentials.Password)
+	if !isValid {
 		return dto.LoginResponseDTO{}, errors.New("Failed to login! : Invalid email or password !")
 	}
 
-	user, err := a.userCredentialsRepo.GetUserCredentialsByEmail(req.Email)
-	userCart, err := a.cartItemRepo.GetCartByUserId(user.Id)
-
+	userData, err := a.userCredentialsRepo.GetUserCartAndRoleByUserId(userCredentials.UserId)
 	if err != nil {
-		return dto.LoginResponseDTO{}, errors.New("Failed to get user by email : " + err.Error())
+		return dto.LoginResponseDTO{}, errors.New("Failed to get user cart and role : " + err.Error())
 	}
 
-	token, err := lib.GenerateToken(user.UserId, userCart.UserId)
+	token, err := lib.GenerateToken(userData.UserId, userData.CartId, userData.RoleName)
 
 	if err != nil {
 		return dto.LoginResponseDTO{}, errors.New("Failed to generate token : " + err.Error())
@@ -93,6 +92,14 @@ func (a AuthService) Register(newUser dto.CreateUserDTO) (dto.CreateUserDTO, err
 	if phoneExist {
 		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : Phone number allready used !")
 	}
+
+	hashedPassword, err := lib.HashPassword(newUser.Password)
+	if err != nil {
+		return dto.CreateUserDTO{}, errors.New("failed to hash password")
+	}
+
+	newUser.Password = hashedPassword
+	newUser.Password_confirm = hashedPassword
 
 	return a.userRepo.CreateNewUser(newUser)
 }
