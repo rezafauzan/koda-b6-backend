@@ -81,3 +81,19 @@ func (c *CartItemRepository) DeleteItem(id int) (models.CartItem, error) {
 
 	return deletedItems, nil
 }
+
+func (c *CartItemRepository) ClearCartItem(cartId int) ([]models.CartItem, error) {
+	sql := `DELETE FROM cart_items WHERE cart_id = $1 RETURNING id, cart_id, product_id, size, hotice, quantity, created_at, updated_at`
+
+	rows, err := c.db.Query(context.Background(), sql, cartId)
+	if err != nil {
+		return []models.CartItem{}, err
+	}
+
+	deletedItems, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.CartItem])
+	if err != nil {
+		return []models.CartItem{}, err
+	}
+
+	return deletedItems, nil
+}

@@ -51,7 +51,7 @@ func (c CartItemHandler) AddItem(ctx *gin.Context) {
 		return
 	}
 	newCartItemData.CartId = cartId.(int)
-	
+
 	result, err := c.cartItemService.AddItem(newCartItemData)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.Response{

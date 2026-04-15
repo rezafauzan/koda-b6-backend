@@ -52,6 +52,8 @@ func (u UserService) CreateNewUser(newUser dto.CreateUserDTO) (dto.CreateUserDTO
 		return dto.CreateUserDTO{}, errors.New("Failed to create new user! : Phone number allready used !")
 	}
 	
+	
+
 	return u.userRepo.CreateNewUser(newUser)
 }
 
