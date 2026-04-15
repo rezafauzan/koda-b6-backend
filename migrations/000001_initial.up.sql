@@ -116,8 +116,9 @@ CREATE TABLE IF NOT EXISTS cart_items(
     id SERIAL PRIMARY KEY,
     cart_id INT NOT NULL,
     product_id INT NOT NULL,
-    size VARCHAR(255) NOT NULL,
-    hotice VARCHAR(255) NOT NULL,
+    size_id INT NOT NULL,
+    variant_id INT NOT NULL,
+    additional_price INT,
     quantity INT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP
